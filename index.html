@@ -2,32 +2,33 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (Versión Aprendizaje en Español)</title>
+<title>Adivina Quién — Friends (con aprendizaje real)</title>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; background: #f9fafb; padding: 20px; color: #1f2937; }
-  #log { background: #111827; color: #e5e7eb; padding: 10px; border-radius: 8px; max-height: 250px; overflow:auto; }
-  button { margin: 8px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; font-weight: 500; }
-  button:hover { background: #2563eb; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; padding: 25px; color: #111827; }
   h1 { color: #2563eb; }
+  button { margin: 6px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; }
+  button:hover { background: #2563eb; }
+  #log { background: #111827; color: #f3f4f6; padding: 10px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+  #pregunta { margin: 15px 0; font-weight: bold; color: #1e40af; }
 </style>
 </head>
 <body>
-<h1>Adivina Quién — Friends (Versión Aprendizaje en Español)</h1>
 
-<p>Juego de inferencia con aprendizaje automático.  
-El sistema intentará adivinar tu personaje de <b>Friends</b> y aprenderá nuevos si no lo conoce.</p>
+<h1>Adivina Quién — Friends (Versión Inteligente en Español)</h1>
+<p>El sistema intentará adivinar qué personaje de <b>Friends</b> estás pensando.  
+Si no lo conoce, aprenderá uno nuevo automáticamente.</p>
 
-<button id="btnIniciar">Iniciar Juego</button>
-<button id="btnPreguntar" disabled>Hacer Pregunta</button>
-<button id="btnAprender">Agregar Personaje Nuevo</button>
+<button id="btnIniciar">Iniciar juego</button>
+<button id="btnPreguntar" disabled>Hacer pregunta</button>
+<button id="btnAprender">Agregar personaje nuevo</button>
 
 <div id="pregunta"></div>
-<h3>Registro:</h3>
+<h3>Registro del sistema:</h3>
 <div id="log"></div>
 
 <script>
 /* ------------------------------
-   Cargar base de conocimiento
+   Cargar personajes desde localStorage
 ------------------------------ */
 function cargarPersonajes() {
   const guardados = localStorage.getItem("personajes_friends");
@@ -45,7 +46,7 @@ function cargarPersonajes() {
 let personajes = cargarPersonajes();
 
 /* ------------------------------
-   Reglas en español
+   Definición de reglas en español
 ------------------------------ */
 let reglas = [
   { atributo: "género", pregunta: v => `¿Tu personaje es ${v}?` },
@@ -84,13 +85,20 @@ class MotorInferencia {
   async hacerPregunta() {
     if (this.personajes.length === 1) {
       const adivina = this.personajes[0].nombre;
-      this.registrar(`🎯 ¡Adiviné! Es ${adivina}`);
-      alert(`Creo que es ${adivina}.`);
+      this.registrar(`🎯 Creo que es ${adivina}`);
+      let respuesta = prompt(`¿Tu personaje es ${adivina}? (sí/no)`);
+      if (respuesta && respuesta.toLowerCase().startsWith("s")) {
+        alert(`¡Genial! Sabía que era ${adivina} 😄`);
+        this.registrar(`✅ Confirmado: era ${adivina}`);
+      } else {
+        this.registrar(`❌ Fallé, no era ${adivina}. Aprenderé quién era.`);
+        await this.aprenderNuevo();
+      }
       return;
     }
 
     if (this.personajes.length === 0) {
-      this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje...");
+      this.registrar("❌ No encontré coincidencias. Activando modo aprendizaje...");
       await this.aprenderNuevo();
       return;
     }
@@ -145,7 +153,7 @@ class MotorInferencia {
 }
 
 /* ------------------------------
-   Controlador principal
+   Control principal del juego
 ------------------------------ */
 let motor = new MotorInferencia(personajes, reglas);
 
