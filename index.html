@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (Aprendizaje Mejorado)</title>
+<title>Adivina Quién — Friends (Versión con Reinicio)</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 25px; color: #111827; }
   h1 { color: #2563eb; }
@@ -12,6 +12,7 @@
   #pregunta { margin: 15px 0; font-weight: bold; color: #1e40af; }
   #opcionesRespuesta button { background: #10b981; }
   #opcionesRespuesta button.no { background: #ef4444; }
+  #botones { margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -20,9 +21,12 @@
 <p>El sistema intentará adivinar qué personaje de <b>Friends</b> estás pensando.  
 Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 
-<button id="btnIniciar">Iniciar juego</button>
-<button id="btnPreguntar" disabled>Hacer pregunta</button>
-<button id="btnAprender">Agregar personaje nuevo</button>
+<div id="botones">
+  <button id="btnIniciar">Iniciar juego</button>
+  <button id="btnPreguntar" disabled>Hacer pregunta</button>
+  <button id="btnAprender">Agregar personaje nuevo</button>
+  <button id="btnReset">🔄 Reiniciar aprendizaje</button>
+</div>
 
 <div id="pregunta"></div>
 <div id="opcionesRespuesta" style="display:none;">
@@ -34,9 +38,7 @@ Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 <div id="log"></div>
 
 <script>
-function cargarPersonajes() {
-  const guardados = localStorage.getItem("personajes_friends");
-  if (guardados) return JSON.parse(guardados);
+function personajesBase() {
   return [
     { nombre: "Rachel", género: "femenino", cabello: "castaño", profesión: "moda", personalidad: "romántica" },
     { nombre: "Monica", género: "femenino", cabello: "negro", profesión: "chef", personalidad: "competitiva" },
@@ -45,6 +47,12 @@ function cargarPersonajes() {
     { nombre: "Joey", género: "masculino", cabello: "castaño", profesión: "actor", personalidad: "divertido" },
     { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina", personalidad: "sarcástico" }
   ];
+}
+
+function cargarPersonajes() {
+  const guardados = localStorage.getItem("personajes_friends");
+  if (guardados) return JSON.parse(guardados);
+  return personajesBase();
 }
 
 let personajes = cargarPersonajes();
@@ -73,12 +81,6 @@ class MotorInferencia {
   seleccionarRegla() {
     const noAplicadas = this.reglas.filter(r => !(r.atributo in this.hechos));
     return noAplicadas.length ? noAplicadas[Math.floor(Math.random() * noAplicadas.length)] : null;
-  }
-
-  aplicarHecho(atributo, valor) {
-    this.hechos[atributo] = valor;
-    this.personajes = this.personajes.filter(p => p[atributo] === valor);
-    this.registrar(`Hecho: ${atributo} = ${valor}`);
   }
 
   hacerPregunta() {
@@ -111,9 +113,8 @@ class MotorInferencia {
     const valores = [...new Set(this.personajes.map(p => p[regla.atributo]))];
     const valor = valores[Math.floor(Math.random() * valores.length)];
     const pregunta = regla.pregunta(valor);
-    preguntaDiv.textContent = pregunta;
-
     const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");
+
     if (respuesta) {
       this.personajes = this.personajes.filter(p => p[regla.atributo] === valor);
     } else {
@@ -168,6 +169,16 @@ document.getElementById("btnNo").onclick = () => {
   motor.registrar(`❌ Fallé, no era ${motor.personajeAdivinado}. Aprenderé quién era.`);
   document.getElementById("opcionesRespuesta").style.display = "none";
   motor.aprenderNuevo();
+};
+
+// 🧹 Reiniciar aprendizaje
+document.getElementById("btnReset").onclick = () => {
+  if (confirm("¿Seguro que quieres borrar todo y reiniciar el conocimiento?")) {
+    localStorage.removeItem("personajes_friends");
+    personajes = personajesBase();
+    alert("✅ Base de conocimiento reiniciada. Ahora solo conoce a los 6 personajes originales.");
+    location.reload();
+  }
 };
 </script>
 </body>
