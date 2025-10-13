@@ -22,10 +22,10 @@
 Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 
 <div id="botones">
-  <button id="btnIniciar">Iniciar juego</button>
-  <button id="btnPreguntar" disabled>Hacer pregunta</button>
-  <button id="btnAprender">Agregar personaje nuevo</button>
-  <button id="btnReset">🔄 Reiniciar aprendizaje</button>
+<button id="btnIniciar">Iniciar juego</button>
+<button id="btnPreguntar">Hacer pregunta</button>
+<button id="btnAprender">Agregar personaje nuevo</button>
+<button id="btnReset">🔄 Reiniciar aprendizaje</button>
 </div>
 
 <div id="pregunta"></div>
@@ -175,8 +175,7 @@ document.getElementById("btnNo").onclick = () => {
 document.getElementById("btnReset").onclick = () => {
   if (confirm("¿Seguro que quieres borrar todo y reiniciar el conocimiento?")) {
     localStorage.removeItem("personajes_friends");
-    personajes = personajesBase();
-    alert("✅ Base de conocimiento reiniciada. Ahora solo conoce a los 6 personajes originales.");
+    alert("✅ Base de conocimiento reiniciada. Se restauraron los 6 personajes originales.");
     location.reload();
   }
 };
