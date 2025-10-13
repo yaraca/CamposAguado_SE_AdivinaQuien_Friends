@@ -2,80 +2,125 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Adivina Quién - Friends (Simulador)</title>
+  <title>Adivina Quién — Friends (Simulador en Español)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; background:#fafafa; color:#222; padding:18px; max-width:900px; margin:auto;}
+    body { font-family: Inter, Arial, sans-serif; background:#fbfbfb; color:#222; padding:18px; max-width:1000px; margin:auto;}
     header { text-align:center; margin-bottom:12px;}
-    h1 { margin:6px 0;}
-    #game { display:flex; gap:16px; flex-wrap:wrap; }
-    .panel { background:white; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:1 1 300px;}
-    .chars { display:flex; flex-wrap:wrap; gap:8px; }
-    .char { border:1px solid #ddd; padding:6px 8px; border-radius:6px; min-width:120px; text-align:center; }
-    .controls { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
+    h1 { margin:6px 0; font-size:24px;}
+    #contenedor { display:flex; gap:16px; flex-wrap:wrap; }
+    .panel { background:white; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:1 1 420px; }
+    .ficha { display:flex; gap:8px; align-items:center; margin-bottom:8px; border-bottom:1px dashed #eee; padding-bottom:6px;}
+    .char { border:1px solid #eee; padding:8px 10px; border-radius:6px; min-width:140px; text-align:left; background:#fff;}
+    .controles { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
     button { padding:8px 12px; border:none; border-radius:6px; background:#1976d2; color:white; cursor:pointer;}
-    button.secondary { background:#777; }
-    .log { background:#111; color:#fff; padding:8px; border-radius:6px; font-size:14px; max-height:150px; overflow:auto;}
-    label { display:block; margin-top:8px; }
-    input[type=text] { width:100%; padding:6px; margin-top:4px; box-sizing:border-box;}
+    button.secondary { background:#6b7280; }
+    .registro { background:#0b1220; color:#e6eef8; padding:8px; border-radius:6px; font-size:13px; max-height:220px; overflow:auto;}
+    label { display:block; margin-top:8px; font-size:13px; color:#333;}
+    input[type=text], select { width:100%; padding:8px; margin-top:6px; box-sizing:border-box; border-radius:6px; border:1px solid #ddd;}
     footer { margin-top:18px; font-size:13px; color:#555;}
+    small { color:#666; }
   </style>
 </head>
 <body>
   <header>
     <h1>Adivina Quién — Friends (Simulador)</h1>
-    <div>Juego educativo: motor de inferencia simple + aprendizaje incremental.</div>
+    <div>Simulador educativo con motor de inferencia (encadenamiento hacia adelante) y aprendizaje incremental.</div>
   </header>
 
-  <div id="game">
-    <div class="panel" style="flex:1 1 360px;">
-      <h3>Estado del juego</h3>
-      <div id="questionArea">Presiona <strong>Iniciar Juego</strong> para comenzar.</div>
+  <div id="contenedor">
+    <div class="panel">
+      <h3>Juego</h3>
+      <div id="areaPregunta">Pulsa <strong>Iniciar juego</strong> para comenzar.</div>
 
-      <div class="controls">
-        <button id="startBtn">Iniciar Juego</button>
-        <button id="askBtn" class="secondary" disabled>Hacer pregunta</button>
-        <button id="guessBtn" class="secondary" disabled>Intentar adivinar</button>
-        <button id="resetBtn" class="secondary">Reiniciar conocimiento</button>
+      <div class="controles">
+        <button id="btnIniciar">Iniciar juego</button>
+        <button id="btnPreguntar" class="secondary" disabled>Hacer pregunta</button>
+        <button id="btnAdivinar" class="secondary" disabled>Intentar adivinar</button>
+        <button id="btnRestaurar" class="secondary">Restaurar conocimiento</button>
       </div>
 
-      <h4>Registro</h4>
-      <div class="log" id="log"></div>
+      <h4 style="margin-top:12px">Registro de acciones</h4>
+      <div id="registro" class="registro"></div>
     </div>
 
-    <div class="panel" style="flex:1 1 480px;">
-      <h3>Personajes (candidatos)</h3>
-      <div id="candidates" class="chars"></div>
+    <div class="panel">
+      <h3>Candidatos</h3>
+      <div id="listaCandidatos"></div>
 
-      <h4>Agregar / Editar personaje</h4>
-      <form id="addForm">
-        <label>Nombre <input id="nameInput" type="text" required /></label>
-        <label>Género (male/female) <input id="genderInput" type="text" value="female" /></label>
-        <label>Cabello (brown/blonde/black) <input id="hairInput" type="text" value="brown" /></label>
-        <label>Cabello largo? (yes/no) <input id="longHairInput" type="text" value="no" /></label>
-        <label>Gafas? (yes/no) <input id="glassesInput" type="text" value="no" /></label>
-        <label>Profesión (paleontologist/chef/actor/musician/manager) <input id="jobInput" type="text" value="actor" /></label>
-        <div style="margin-top:8px;">
-          <button id="addBtn" type="submit">Agregar / Actualizar</button>
+      <h4 style="margin-top:12px">Agregar / Actualizar personaje</h4>
+      <form id="formAgregar">
+        <label>Nombre
+          <input id="inputNombre" type="text" placeholder="Ej: Janice" required />
+        </label>
+
+        <label>Género
+          <select id="inputGenero">
+            <option value="female">Femenino</option>
+            <option value="male">Masculino</option>
+          </select>
+        </label>
+
+        <label>Color de cabello
+          <select id="inputCabello">
+            <option value="brown">Café</option>
+            <option value="blonde">Rubio</option>
+            <option value="black">Negro</option>
+            <option value="other">Otro</option>
+          </select>
+        </label>
+
+        <label>Cabello largo
+          <select id="inputLargo">
+            <option value="yes">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+
+        <label>Usa gafas
+          <select id="inputGafas">
+            <option value="no">No</option>
+            <option value="yes">Sí</option>
+          </select>
+        </label>
+
+        <label>Profesión
+          <select id="inputTrabajo">
+            <option value="actor">Actor</option>
+            <option value="chef">Chef</option>
+            <option value="musician">Músico</option>
+            <option value="paleontologist">Paleontólogo</option>
+            <option value="it">TI</option>
+            <option value="fashion">Moda</option>
+            <option value="other">Otro</option>
+          </select>
+        </label>
+
+        <div style="margin-top:10px">
+          <button id="btnAgregar" type="submit">Agregar / Actualizar</button>
         </div>
       </form>
     </div>
   </div>
 
   <footer>
-    <strong>Cómo juega el sistema:</strong> El motor usa respuestas sí/no a preguntas sobre atributos (reglas del tipo "si atributo entonces candidato"). Se aplica encadenamiento hacia adelante (filtrado por hechos). Si el sistema no adivina correctamente, pide los datos para aprender y los guarda en su base (localStorage).
+    <strong>Cómo funciona:</strong> el sistema formula preguntas sobre atributos (sí/no) y aplica esos hechos para filtrar candidatos (encadenamiento hacia adelante). Si falla al adivinar, pide que introduzcas los datos del personaje para aprender (persistencia en localStorage).
   </footer>
 
 <script>
-/*
-  Simulador Adivina Quién - Friends
-  - Base de conocimiento persistente en localStorage ("friends_kb")
-  - Motor simple que usa atributos por personaje y filtra candidatos (encadenamiento hacia adelante)
-  - Aprendizaje: si falla, pedirá nombre y atributos para agregar.
-*/
+/* ------------------------------------------------------------
+   Simulador Adivina Quién - Versión en español y corregida
+   - KB persistente en localStorage (clave: friends_kb_v1_es)
+   - Motor simple de inferencia con encadenamiento hacia adelante
+   - Aprendizaje incremental si falla el sistema
+   - Interfaz en español y validaciones básicas
+   ------------------------------------------------------------ */
 
-// --- Base de conocimiento inicial (personajes de Friends con atributos simples) ---
-const defaultKB = [
+// Clave de almacenamiento
+const CLAVE_KB = "friends_kb_v1_es";
+
+// Conocimiento inicial (personajes principales de Friends)
+const KB_INICIAL = [
   { name: "Rachel", gender:"female", hair:"brown", longHair:"yes", glasses:"no", job:"fashion" },
   { name: "Monica", gender:"female", hair:"brown", longHair:"yes", glasses:"no", job:"chef" },
   { name: "Phoebe", gender:"female", hair:"blonde", longHair:"yes", glasses:"no", job:"musician" },
@@ -84,229 +129,239 @@ const defaultKB = [
   { name: "Ross", gender:"male", hair:"black", longHair:"no", glasses:"no", job:"paleontologist" }
 ];
 
-const STORAGE_KEY = "friends_kb_v1";
-
-function loadKB(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) { localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultKB)); return defaultKB.slice(); }
-  try { return JSON.parse(raw); } catch(e) { localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultKB)); return defaultKB.slice(); }
+// Cargar KB desde localStorage o inicializar
+function cargarKB(){
+  const raw = localStorage.getItem(CLAVE_KB);
+  if(!raw){ localStorage.setItem(CLAVE_KB, JSON.stringify(KB_INICIAL)); return KB_INICIAL.slice(); }
+  try { return JSON.parse(raw); }
+  catch(e){ localStorage.setItem(CLAVE_KB, JSON.stringify(KB_INICIAL)); return KB_INICIAL.slice(); }
 }
-function saveKB(kb){ localStorage.setItem(STORAGE_KEY, JSON.stringify(kb)); }
+function guardarKB(kb){ localStorage.setItem(CLAVE_KB, JSON.stringify(kb)); }
 
-let KB = loadKB();
-let candidates = [];
-let askedFacts = {}; // facts answered by user, e.g. { gender: 'female' }
-let currentQuestion = null;
-let gameActive = false;
+// Estado del juego
+let KB = cargarKB();
+let candidatos = [];
+let hechos = {}; // hechos confirmados: { attr: value } o { attr: "not:value" }
+let preguntaActual = null;
+let juegoActivo = false;
 
-// --- UI references ---
-const candidatesDiv = document.getElementById('candidates');
-const logDiv = document.getElementById('log');
-const questionArea = document.getElementById('questionArea');
-const startBtn = document.getElementById('startBtn');
-const askBtn = document.getElementById('askBtn');
-const guessBtn = document.getElementById('guessBtn');
-const resetBtn = document.getElementById('resetBtn');
+// Referencias UI
+const listaCandidatos = document.getElementById('listaCandidatos');
+const registro = document.getElementById('registro');
+const areaPregunta = document.getElementById('areaPregunta');
+const btnIniciar = document.getElementById('btnIniciar');
+const btnPreguntar = document.getElementById('btnPreguntar');
+const btnAdivinar = document.getElementById('btnAdivinar');
+const btnRestaurar = document.getElementById('btnRestaurar');
+const formAgregar = document.getElementById('formAgregar');
 
-// render candidates
-function renderCandidates(list){
-  candidatesDiv.innerHTML = '';
-  list.forEach(p=>{
-    const d = document.createElement('div'); d.className='char';
-    d.innerHTML = `<strong>${p.name}</strong><div style="font-size:12px;color:#666">${p.gender} · ${p.hair} · ${p.job}</div>`;
-    candidatesDiv.appendChild(d);
+// Renderizar candidatos
+function renderizarCandidatos(lista){
+  listaCandidatos.innerHTML = '';
+  lista.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'ficha';
+    div.innerHTML = `<div class="char"><strong>${p.name}</strong><br><small>${p.gender} · ${p.hair} · ${p.job}</small></div>`;
+    listaCandidatos.appendChild(div);
   });
 }
 
-// logging
-function log(text){
-  const p = document.createElement('div'); p.textContent = text;
-  logDiv.prepend(p);
+// Escribir en registro
+function escribirRegistro(texto){
+  const d = document.createElement('div');
+  d.textContent = `${new Date().toLocaleTimeString()} — ${texto}`;
+  registro.prepend(d);
 }
 
-// start game
-startBtn.onclick = () => {
-  KB = loadKB();
-  candidates = KB.slice();
-  askedFacts = {};
-  gameActive = true;
-  questionArea.innerHTML = `<strong>Juego iniciado.</strong> Hay ${candidates.length} candidatos.`;
-  renderCandidates(candidates);
-  log("Juego iniciado. Candidatos cargados: " + candidates.map(c=>c.name).join(', '));
-  askBtn.disabled = false;
-  guessBtn.disabled = false;
+// Iniciar juego
+btnIniciar.onclick = () => {
+  KB = cargarKB();
+  candidatos = KB.slice();
+  hechos = {};
+  preguntaActual = null;
+  juegoActivo = true;
+  areaPregunta.innerHTML = `<strong>Juego iniciado.</strong> Hay ${candidatos.length} candidatos.`;
+  renderizarCandidatos(candidatos);
+  escribirRegistro("Juego iniciado. Candidatos: " + candidatos.map(c=>c.name).join(', '));
+  btnPreguntar.disabled = false;
+  btnAdivinar.disabled = false;
 }
 
-// choose next question heuristically: pick attribute that best splits remaining candidates
-function chooseQuestion(){
-  const attrs = ['gender','hair','longHair','glasses','job'];
-  const counts = {};
-  attrs.forEach(a=>{
-    counts[a] = {};
-    candidates.forEach(c=>{
-      counts[a][ c[a] ] = (counts[a][ c[a] ]||0) + 1;
-    });
+// Elegir la mejor pregunta (heurística: elegir atributo con más de un valor y mejor balance)
+function elegirPregunta(){
+  const atributos = ['gender','hair','longHair','glasses','job'];
+  const conteos = {};
+  atributos.forEach(a=>{
+    conteos[a] = {};
+    candidatos.forEach(c => { conteos[a][c[a]] = (conteos[a][c[a]] || 0) + 1; });
   });
-  // find attr with more than one distinct value and best split
-  let best = null, bestScore = Infinity;
-  for(const a of attrs){
-    const vals = Object.keys(counts[a]);
-    if (vals.length <= 1) continue;
-    // compute balance score (min difference)
-    let maxcount = Math.max(...Object.values(counts[a]));
-    let mincount = Math.min(...Object.values(counts[a]));
-    let score = maxcount - mincount;
-    if (score < bestScore){
-      bestScore = score; best = a;
-    }
+
+  // evitar preguntar atributos ya determinados en hechos (ej: si ya sabemos gender=female)
+  const posibles = atributos.filter(a => !Object.keys(hechos).includes(a));
+  let mejor = null, mejorScore = Infinity;
+  for(const a of posibles){
+    const vals = Object.keys(conteos[a]);
+    if(vals.length <= 1) continue; // no sirve si todas comparten el mismo valor
+    // balance: buscamos que la diferencia entre mayor y menor sea mínima
+    const maxC = Math.max(...Object.values(conteos[a]));
+    const minC = Math.min(...Object.values(conteos[a]));
+    const score = maxC - minC;
+    if(score < mejorScore){ mejorScore = score; mejor = a; }
   }
-  if (!best) return null;
-  // choose most common value for that attribute as candidate
-  const valCounts = counts[best];
-  // We'll ask about the most common value to filter quickly
-  const mostCommon = Object.keys(valCounts).sort((x,y)=>valCounts[y]-valCounts[x])[0];
-  return {attr: best, value: mostCommon};
+  if(!mejor) return null;
+  // elegir el valor más frecuente para ese atributo (para filtrar rápidamente)
+  const valCounts = conteos[mejor];
+  const masComun = Object.keys(valCounts).sort((x,y)=>valCounts[y]-valCounts[x])[0];
+  return { attr: mejor, value: masComun };
 }
 
-// ask question
-askBtn.onclick = async () => {
-  if (!gameActive) { alert("Inicia el juego primero."); return; }
-  currentQuestion = chooseQuestion();
-  if (!currentQuestion){
-    questionArea.innerHTML = "<strong>No quedan preguntas útiles.</strong>";
+// Preguntar al usuario
+btnPreguntar.onclick = () => {
+  if(!juegoActivo){ alert("Inicia el juego primero."); return; }
+  preguntaActual = elegirPregunta();
+  if(!preguntaActual){
+    areaPregunta.innerHTML = "<strong>No hay preguntas útiles restantes.</strong>";
+    escribirRegistro("No quedan preguntas útiles.");
     return;
   }
-  const text = `¿El personaje tiene ${currentQuestion.attr} = ${currentQuestion.value}? (responde sí/no)`;
-  questionArea.innerHTML = `<div>${text}</div>`;
-  log("Pregunta: " + text);
-  // ask user
-  let ans = prompt(text);
-  if (ans === null) { log("Pregunta cancelada por usuario."); return; }
-  ans = ans.trim().toLowerCase();
-  const positive = (ans === 'si' || ans === 'sí' || ans === 's' || ans === 'yes' || ans==='y');
-  // apply fact
-  const attr = currentQuestion.attr;
-  const val = currentQuestion.value;
-  if (positive) { askedFacts[attr] = val; log(`Hecho: ${attr} = ${val}`); }
-  else {
-    // negative fact: we can record attr != val by removing those with attr==val
-    // but for forward chaining we will record as askedFacts[attr] = "not:"+val to avoid asking same exact
-    askedFacts[attr] = "not:"+val;
-    log(`Hecho: ${attr} != ${val}`);
+  const texto = `¿El personaje tiene ${preguntaActual.attr} = ${preguntaActual.value}? (responde sí/no)`;
+  areaPregunta.innerHTML = `<div>${texto}</div>`;
+  escribirRegistro("Pregunta: " + texto);
+  let respuesta = prompt(texto);
+  if(respuesta === null){ escribirRegistro("El usuario canceló la pregunta."); return; }
+  respuesta = respuesta.trim().toLowerCase();
+  const positivo = ['si','sí','s','y','yes'].includes(respuesta);
+  const attr = preguntaActual.attr;
+  const val = preguntaActual.value;
+  if(positivo){
+    hechos[attr] = val;
+    escribirRegistro(`Hecho: ${attr} = ${val}`);
+  } else {
+    hechos[attr] = "not:"+val;
+    escribirRegistro(`Hecho: ${attr} != ${val}`);
   }
-  // forward chaining: filter candidates
-  applyFacts();
-  renderCandidates(candidates);
-  questionArea.innerHTML += `<div><em>Candidatos ahora: ${candidates.length}</em></div>`;
-  // if only one left, auto-guess
-  if (candidates.length === 1){
-    const guess = candidates[0];
-    const ok = confirm(`Creo que es ${guess.name}. ¿Estoy en lo correcto?`);
-    if (ok){ log(`Sistema: Adivinó correctamente: ${guess.name}`); alert("¡Adiviné!"); gameActive=false; askBtn.disabled=true; guessBtn.disabled=true; }
-    else { log("Sistema: Adiviné mal."); handleLearning(); }
-  } else if (candidates.length === 0){
-    log("No quedan candidatos tras aplicar hechos. El sistema necesita aprender.");
-    handleLearning();
+  aplicarHechos();
+  renderizarCandidatos(candidatos);
+  areaPregunta.innerHTML += `<div><em>Candidatos ahora: ${candidatos.length}</em></div>`;
+
+  if(candidatos.length === 1){
+    const adiv = candidatos[0];
+    const confirma = confirm(`Creo que es ${adiv.name}. ¿Es correcto?`);
+    if(confirma){
+      escribirRegistro(`Sistema: Adivinó correctamente: ${adiv.name}`);
+      alert("¡He adivinado!");
+      juegoActivo = false; btnPreguntar.disabled = true; btnAdivinar.disabled = true;
+    } else {
+      escribirRegistro("Sistema: Adivinó mal.");
+      gestionarAprendizaje();
+    }
+  } else if(candidatos.length === 0){
+    escribirRegistro("No quedan candidatos después de aplicar hechos. Se requiere aprendizaje.");
+    gestionarAprendizaje();
   }
 }
 
-// apply facts (forward chaining style)
-function applyFacts(){
-  candidates = KB.filter(p=>{
-    for(const [attr, val] of Object.entries(askedFacts)){
-      if (typeof val === 'string' && val.startsWith("not:")){
+// Aplicar hechos (encadenamiento hacia adelante simple)
+function aplicarHechos(){
+  candidatos = KB.filter(p => {
+    for(const [attr, val] of Object.entries(hechos)){
+      if(typeof val === 'string' && val.startsWith("not:")){
         const v = val.slice(4);
-        if (p[attr] === v) return false;
+        if(p[attr] === v) return false;
       } else {
-        if (p[attr] != val) return false;
+        if(p[attr] != val) return false;
       }
     }
     return true;
   });
 }
 
-// user attempts to guess manually
-guessBtn.onclick = () => {
-  if (!gameActive) { alert("Inicia el juego primero."); return; }
-  const name = prompt("¿A quién quieres adivinar? (Escribe nombre exacto)");
-  if (!name) return;
-  const guess = KB.find(p => p.name.toLowerCase() === name.toLowerCase());
-  if (!guess){ alert("No conozco a ese personaje."); handleLearning(name); return; }
-  // check if it's among candidates or unambiguous
-  const answer = confirm(`¿Tu personaje es ${guess.name}?`);
-  if (answer){
-    alert("¡Genial! Adiviné o el usuario confirmó.");
-    log("Usuario confirmó personaje: " + guess.name);
-    gameActive=false; askBtn.disabled=true; guessBtn.disabled=true;
+// Intento manual de adivinar por parte del usuario
+btnAdivinar.onclick = () => {
+  if(!juegoActivo){ alert("Inicia el juego primero."); return; }
+  const nombre = prompt("¿A quién quieres adivinar? (Escribe el nombre exacto)");
+  if(!nombre) return;
+  const encontrado = KB.find(p => p.name.toLowerCase() === nombre.trim().toLowerCase());
+  if(!encontrado){ alert("No conozco a ese personaje. Voy a pedir que lo enseñes."); gestionarAprendizaje(nombre); return; }
+  const confirma = confirm(`¿Tu personaje es ${encontrado.name}?`);
+  if(confirma){
+    escribirRegistro("Usuario confirmó personaje: " + encontrado.name);
+    alert("¡Perfecto! Confirmado.");
+    juegoActivo = false; btnPreguntar.disabled = true; btnAdivinar.disabled = true;
   } else {
-    alert("No adiviné. Voy a aprender.");
-    log("Adivinanza fallida con: " + guess.name);
-    handleLearning();
+    escribirRegistro("Usuario dijo que no: " + encontrado.name);
+    alert("No adiviné. Aprenderé ese personaje.");
+    gestionarAprendizaje();
   }
 }
 
-// learning function: ask user to add new character info
-function handleLearning(knownName){
-  const name = knownName || prompt("¿Cuál era el personaje correcto? (Escribe nombre)");
-  if (!name) { log("Aprendizaje cancelado."); return; }
-  const gender = prompt("Género (male/female)", "female") || "female";
-  const hair = prompt("Cabello (brown/blonde/black)", "brown") || "brown";
-  const longHair = prompt("Cabello largo? (yes/no)", "no") || "no";
-  const glasses = prompt("Gafas? (yes/no)", "no") || "no";
-  const job = prompt("Profesión (chef/actor/musician/paleontologist/it/fashion/other)", "other") || "other";
-  // add to KB or update existing
-  const exists = KB.find(p => p.name.toLowerCase() === name.toLowerCase());
-  if (exists){
-    exists.gender = gender; exists.hair = hair; exists.longHair = longHair; exists.glasses = glasses; exists.job = job;
-    log("Conocimiento actualizado para " + name);
+// Aprendizaje: pedir datos del personaje y guardar en KB
+function gestionarAprendizaje(nombreConocido){
+  const nombre = nombreConocido || prompt("¿Cuál era el personaje correcto? (Escribe el nombre)");
+  if(!nombre){ escribirRegistro("Aprendizaje cancelado."); return; }
+  const genero = prompt("Género (female/male)", "female") || "female";
+  const cabello = prompt("Cabello (brown/blonde/black/other)", "brown") || "brown";
+  const largo = prompt("Cabello largo? (yes/no)", "no") || "no";
+  const gafas = prompt("¿Usa gafas? (yes/no)", "no") || "no";
+  const trabajo = prompt("Profesión (actor/chef/musician/paleontologist/it/fashion/other)", "other") || "other";
+
+  const existe = KB.find(p => p.name.toLowerCase() === nombre.trim().toLowerCase());
+  if(existe){
+    existe.gender = genero; existe.hair = cabello; existe.longHair = largo; existe.glasses = gafas; existe.job = trabajo;
+    escribirRegistro("Conocimiento actualizado para: " + nombre);
   } else {
-    KB.push({name, gender, hair, longHair, glasses, job});
-    log("Aprendido nuevo personaje: " + name);
+    KB.push({ name: nombre, gender: genero, hair: cabello, longHair: largo, glasses: gafas, job: trabajo });
+    escribirRegistro("Aprendido nuevo personaje: " + nombre);
   }
-  saveKB(KB);
-  // reset game
-  candidates = KB.slice(); askedFacts = {}; currentQuestion = null;
-  renderCandidates(candidates);
-  questionArea.innerHTML = "<strong>He aprendido. Reinicia el juego para jugar otra vez.</strong>";
-  gameActive=false; askBtn.disabled=true; guessBtn.disabled=true;
+  guardarKB(KB);
+  // Reiniciar estado de juego
+  candidatos = KB.slice(); hechos = {}; preguntaActual = null;
+  renderizarCandidatos(candidatos);
+  areaPregunta.innerHTML = "<strong>He aprendido. Reinicia el juego para jugar otra vez.</strong>";
+  juegoActivo = false; btnPreguntar.disabled = true; btnAdivinar.disabled = true;
 }
 
-// add / update via form
-document.getElementById('addForm').onsubmit = (e) => {
+// Formulario para agregar/actualizar personajes manualmente
+formAgregar.onsubmit = (e) => {
   e.preventDefault();
-  const name = document.getElementById('nameInput').value.trim();
-  if (!name) return alert("Nombre requerido");
-  const gender = document.getElementById('genderInput').value.trim() || "female";
-  const hair = document.getElementById('hairInput').value.trim() || "brown";
-  const longHair = document.getElementById('longHairInput').value.trim() || "no";
-  const glasses = document.getElementById('glassesInput').value.trim() || "no";
-  const job = document.getElementById('jobInput').value.trim() || "other";
-  const exists = KB.find(p => p.name.toLowerCase() === name.toLowerCase());
-  if (exists){
-    exists.gender=gender; exists.hair=hair; exists.longHair=longHair; exists.glasses=glasses; exists.job=job;
-    log("Personaje actualizado vía formulario: " + name);
+  const nombre = document.getElementById('inputNombre').value.trim();
+  if(!nombre) return alert("Nombre requerido");
+  const genero = document.getElementById('inputGenero').value;
+  const cabello = document.getElementById('inputCabello').value;
+  const largo = document.getElementById('inputLargo').value;
+  const gafas = document.getElementById('inputGafas').value;
+  const trabajo = document.getElementById('inputTrabajo').value;
+  const existe = KB.find(p => p.name.toLowerCase() === nombre.toLowerCase());
+  if(existe){
+    existe.gender = genero; existe.hair = cabello; existe.longHair = largo; existe.glasses = gafas; existe.job = trabajo;
+    escribirRegistro("Personaje actualizado: " + nombre);
   } else {
-    KB.push({name, gender, hair, longHair, glasses, job});
-    log("Personaje agregado vía formulario: " + name);
+    KB.push({ name: nombre, gender: genero, hair: cabello, longHair: largo, glasses: gafas, job: trabajo });
+    escribirRegistro("Personaje agregado: " + nombre);
   }
-  saveKB(KB);
-  renderCandidates(KB);
-  // clear form
-  document.getElementById('addForm').reset();
+  guardarKB(KB);
+  renderizarCandidatos(KB);
+  formAgregar.reset();
 }
 
-// Reset knowledge (delete localStorage)
-resetBtn.onclick = () => {
-  if (!confirm("¿Eliminar todo el conocimiento aprendido y restaurar por defecto?")) return;
-  localStorage.removeItem(STORAGE_KEY);
-  KB = loadKB();
-  renderCandidates(KB);
-  log("Conocimiento restaurado a valores por defecto.");
+// Restaurar conocimiento inicial
+btnRestaurar.onclick = () => {
+  if(!confirm("¿Restaurar el conocimiento inicial? Se perderán los personajes aprendidos.")) return;
+  localStorage.removeItem(CLAVE_KB);
+  KB = cargarKB();
+  candidatos = KB.slice();
+  hechos = {};
+  renderizarCandidatos(KB);
+  escribirRegistro("Conocimiento restaurado a valores iniciales.");
+  areaPregunta.innerHTML = "Conocimiento restaurado. Inicia el juego cuando quieras.";
+  juegoActivo = false; btnPreguntar.disabled = true; btnAdivinar.disabled = true;
 }
 
-// initial render
-renderCandidates(KB);
-log("KB cargada. Puedes iniciar el juego.");
+// Inicializar vista
+renderizarCandidatos(KB);
+escribirRegistro("KB cargada. Pulsa Iniciar juego para comenzar.");
+
 </script>
 </body>
 </html>
+
