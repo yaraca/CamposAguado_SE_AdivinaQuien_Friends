@@ -1,9 +1,12 @@
+<!--ADIVINA QUÍEN - FRIENDS -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es"> 
 <head>
 <meta charset="UTF-8">
 <title>Adivina Quién — Friends (Versión con Reinicio)</title>
 <style>
+  /* Estilos básicos */
+  /*css*/
   body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 25px; color: #111827; }
   h1 { color: #2563eb; }
   button { margin: 6px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; }
@@ -17,7 +20,7 @@
 </head>
 <body>
 
-<h1>Adivina Quién — Friends 👀</h1>
+<h1>Adivina Quién — Friends </h1>
 <p>El sistema intentará adivinar qué personaje de <b>Friends</b> estás pensando.  
 Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 
@@ -37,7 +40,10 @@ Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 <h3>Registro del sistema:</h3>
 <div id="log"></div>
 
+
 <script>
+// ----- Lógica del juego ----- //
+// JavaScript //
 function personajesBase() {
   return [
     { nombre: "Rachel", género: "femenino", cabello: "castaño", profesión: "moda", personalidad: "romántica" },
