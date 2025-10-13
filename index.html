@@ -2,34 +2,38 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (con aprendizaje real)</title>
+<title>Adivina Quién — Friends (Aprendizaje Mejorado)</title>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; padding: 25px; color: #111827; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 25px; color: #111827; }
   h1 { color: #2563eb; }
   button { margin: 6px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; }
   button:hover { background: #2563eb; }
-  #log { background: #111827; color: #f3f4f6; padding: 10px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+  #log { background: #111827; color: #f3f4f6; padding: 10px; border-radius: 8px; max-height: 250px; overflow-y: auto; }
   #pregunta { margin: 15px 0; font-weight: bold; color: #1e40af; }
+  #opcionesRespuesta button { background: #10b981; }
+  #opcionesRespuesta button.no { background: #ef4444; }
 </style>
 </head>
 <body>
 
-<h1>Adivina Quién — Friends (Versión Inteligente en Español)</h1>
+<h1>Adivina Quién — Friends 👀</h1>
 <p>El sistema intentará adivinar qué personaje de <b>Friends</b> estás pensando.  
-Si no lo conoce, aprenderá uno nuevo automáticamente.</p>
+Si no lo conoce, aprenderá automáticamente para la próxima vez.</p>
 
 <button id="btnIniciar">Iniciar juego</button>
 <button id="btnPreguntar" disabled>Hacer pregunta</button>
 <button id="btnAprender">Agregar personaje nuevo</button>
 
 <div id="pregunta"></div>
+<div id="opcionesRespuesta" style="display:none;">
+  <button id="btnSi">✅ Sí</button>
+  <button id="btnNo" class="no">❌ No</button>
+</div>
+
 <h3>Registro del sistema:</h3>
 <div id="log"></div>
 
 <script>
-/* ------------------------------
-   Cargar personajes desde localStorage
------------------------------- */
 function cargarPersonajes() {
   const guardados = localStorage.getItem("personajes_friends");
   if (guardados) return JSON.parse(guardados);
@@ -45,9 +49,6 @@ function cargarPersonajes() {
 
 let personajes = cargarPersonajes();
 
-/* ------------------------------
-   Definición de reglas en español
------------------------------- */
 let reglas = [
   { atributo: "género", pregunta: v => `¿Tu personaje es ${v}?` },
   { atributo: "cabello", pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
@@ -55,15 +56,13 @@ let reglas = [
   { atributo: "personalidad", pregunta: v => `¿Tu personaje es ${v}?` }
 ];
 
-/* ------------------------------
-   Motor de inferencia
------------------------------- */
 class MotorInferencia {
   constructor(personajes, reglas) {
     this.personajes = [...personajes];
     this.reglas = reglas;
     this.hechos = {};
     this.log = [];
+    this.personajeAdivinado = null;
   }
 
   registrar(texto) {
@@ -79,65 +78,58 @@ class MotorInferencia {
   aplicarHecho(atributo, valor) {
     this.hechos[atributo] = valor;
     this.personajes = this.personajes.filter(p => p[atributo] === valor);
-    this.registrar(`Hecho aprendido: ${atributo} = ${valor}`);
+    this.registrar(`Hecho: ${atributo} = ${valor}`);
   }
 
-  async hacerPregunta() {
+  hacerPregunta() {
+    const preguntaDiv = document.getElementById("pregunta");
+    const opcionesDiv = document.getElementById("opcionesRespuesta");
+    opcionesDiv.style.display = "none";
+
     if (this.personajes.length === 1) {
       const adivina = this.personajes[0].nombre;
-      this.registrar(`🎯 Creo que es ${adivina}`);
-      let respuesta = prompt(`¿Tu personaje es ${adivina}? (sí/no)`);
-      if (respuesta && respuesta.toLowerCase().startsWith("s")) {
-        alert(`¡Genial! Sabía que era ${adivina} 😄`);
-        this.registrar(`✅ Confirmado: era ${adivina}`);
-      } else {
-        this.registrar(`❌ Fallé, no era ${adivina}. Aprenderé quién era.`);
-        await this.aprenderNuevo();
-      }
+      this.personajeAdivinado = adivina;
+      preguntaDiv.textContent = `🎯 Creo que es ${adivina}. ¿Es correcto?`;
+      opcionesDiv.style.display = "block";
+      this.registrar(`Posible personaje: ${adivina}`);
       return;
     }
 
     if (this.personajes.length === 0) {
-      this.registrar("❌ No encontré coincidencias. Activando modo aprendizaje...");
-      await this.aprenderNuevo();
+      this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje...");
+      this.aprenderNuevo();
       return;
     }
 
     const regla = this.seleccionarRegla();
     if (!regla) {
-      this.registrar("No hay más preguntas aplicables.");
-      await this.aprenderNuevo();
+      this.registrar("No hay más preguntas posibles.");
+      this.aprenderNuevo();
       return;
     }
 
     const valores = [...new Set(this.personajes.map(p => p[regla.atributo]))];
     const valor = valores[Math.floor(Math.random() * valores.length)];
     const pregunta = regla.pregunta(valor);
+    preguntaDiv.textContent = pregunta;
 
-    this.registrar(`Pregunta: ${pregunta}`);
-    document.getElementById("pregunta").textContent = pregunta;
+    const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");
+    if (respuesta) {
+      this.personajes = this.personajes.filter(p => p[regla.atributo] === valor);
+    } else {
+      this.personajes = this.personajes.filter(p => p[regla.atributo] !== valor);
+    }
 
-    let respuesta = prompt(pregunta + " (sí/no)");
-    if (!respuesta) return;
-    respuesta = respuesta.toLowerCase();
-
-    const mapa = { "sí": true, "si": true, "s": true, "no": false, "n": false };
-    const afirmativo = mapa[respuesta] ?? false;
-
-    this.personajes = this.personajes.filter(p =>
-      afirmativo ? p[regla.atributo] === valor : p[regla.atributo] !== valor
-    );
-
-    if (this.personajes.length <= 1) await this.hacerPregunta();
+    this.hacerPregunta();
   }
 
-  async aprenderNuevo() {
+  aprenderNuevo() {
     this.registrar("🧠 Modo aprendizaje activado.");
     const nombre = prompt("¿Cuál era el personaje que pensabas?");
     if (!nombre) return;
 
     let nuevo = { nombre: nombre.trim() };
-    this.registrar(`Aprendiendo nuevo personaje: ${nuevo.nombre}`);
+    this.registrar(`Aprendiendo personaje: ${nuevo.nombre}`);
 
     this.reglas.forEach(r => {
       let valor = prompt(`¿Cuál es el valor de '${r.atributo}' para ${nuevo.nombre}?`);
@@ -147,25 +139,36 @@ class MotorInferencia {
     personajes.push(nuevo);
     localStorage.setItem("personajes_friends", JSON.stringify(personajes));
 
-    this.registrar(`✅ Nuevo personaje aprendido: ${nuevo.nombre}`);
+    this.registrar(`✅ Personaje aprendido: ${nuevo.nombre}`);
     alert(`He aprendido un nuevo personaje: ${nuevo.nombre}!`);
   }
 }
 
-/* ------------------------------
-   Control principal del juego
------------------------------- */
+// ----- Control principal -----
 let motor = new MotorInferencia(personajes, reglas);
 
 document.getElementById("btnIniciar").onclick = () => {
   motor = new MotorInferencia(personajes, reglas);
   motor.registrar("🎮 Juego iniciado.");
   document.getElementById("btnPreguntar").disabled = false;
+  document.getElementById("pregunta").textContent = "";
 };
 
 document.getElementById("btnPreguntar").onclick = () => motor.hacerPregunta();
 
 document.getElementById("btnAprender").onclick = () => motor.aprenderNuevo();
+
+document.getElementById("btnSi").onclick = () => {
+  motor.registrar(`✅ Confirmado: era ${motor.personajeAdivinado}`);
+  alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} 😄`);
+  document.getElementById("opcionesRespuesta").style.display = "none";
+};
+
+document.getElementById("btnNo").onclick = () => {
+  motor.registrar(`❌ Fallé, no era ${motor.personajeAdivinado}. Aprenderé quién era.`);
+  document.getElementById("opcionesRespuesta").style.display = "none";
+  motor.aprenderNuevo();
+};
 </script>
 </body>
 </html>
