@@ -1,19 +1,21 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>Adivina Quién — Friends (Simulador en Español)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+/*Simulador Adivina Quién de Friends con aprendizaje incremental y persistencia en localStorage*/
+
+<!doctype html> /*archivo HTML5*/
+<html lang="es"> /* Idioma español */
+<head> /* Metadatos y estilos */
+  <meta charset="utf-8" /> /*codificación de caracteres*/
+  <title>Adivina Quién — Friends </title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" /> /* para móviles, se ajusta al dispositivo */
   <style>
-    body { font-family: Inter, Arial, sans-serif; background:#fbfbfb; color:#222; padding:18px; max-width:1000px; margin:auto;}
+    body { font-family: Inter, Arial, sans-serif; background:#000000; color:#ffc402; padding:18px; max-width:1000px; margin:auto;}
     header { text-align:center; margin-bottom:12px;}
-    h1 { margin:6px 0; font-size:24px;}
+    h1 { margin:6px 0; font-size:32px;}
     #contenedor { display:flex; gap:16px; flex-wrap:wrap; }
-    .panel { background:white; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:1 1 420px; }
+    .panel { background:rgb(252, 167, 10); border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:1 1 420px; }
     .ficha { display:flex; gap:8px; align-items:center; margin-bottom:8px; border-bottom:1px dashed #eee; padding-bottom:6px;}
     .char { border:1px solid #eee; padding:8px 10px; border-radius:6px; min-width:140px; text-align:left; background:#fff;}
     .controles { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
-    button { padding:8px 12px; border:none; border-radius:6px; background:#1976d2; color:white; cursor:pointer;}
+    button { padding:8px 12px; border:none; border-radius:6px; background:#0770d8; color:white; cursor:pointer;}
     button.secondary { background:#6b7280; }
     .registro { background:#0b1220; color:#e6eef8; padding:8px; border-radius:6px; font-size:13px; max-height:220px; overflow:auto;}
     label { display:block; margin-top:8px; font-size:13px; color:#333;}
