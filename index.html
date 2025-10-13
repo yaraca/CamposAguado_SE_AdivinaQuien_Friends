@@ -2,18 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (Versión con Aprendizaje)</title>
+<title>Adivina Quién — Friends (Versión Aprendida en Español)</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #fafafa; padding: 20px; color: #222; }
-  #log { background: #111; color: #eee; padding: 10px; border-radius: 8px; max-height: 250px; overflow:auto; }
-  button { margin: 8px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; }
-  h1 { color: #1e40af; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f9fafb; padding: 20px; color: #1f2937; }
+  #log { background: #111827; color: #e5e7eb; padding: 10px; border-radius: 8px; max-height: 250px; overflow:auto; }
+  button { margin: 8px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; font-weight: 500; }
+  h1 { color: #2563eb; }
 </style>
 </head>
 <body>
-<h1>Adivina Quién — Friends (Aprendizaje Automático)</h1>
+<h1>Adivina Quién — Friends (Versión Aprendizaje en Español)</h1>
 
-<p>Juego con inferencia hacia adelante y aprendizaje automático sin usar <code>if</code> tradicionales.</p>
+<p>Juego con inferencia hacia adelante y aprendizaje automático, totalmente en español.</p>
 
 <button id="btnIniciar">Iniciar Juego</button>
 <button id="btnPreguntar" disabled>Hacer Pregunta</button>
@@ -29,24 +29,25 @@ function cargarPersonajes() {
   const guardados = localStorage.getItem("personajes_friends");
   if (guardados) return JSON.parse(guardados);
   return [
-    { nombre: "Rachel", genero: "femenino", cabello: "castaño", trabajo: "moda" },
-    { nombre: "Monica", genero: "femenino", cabello: "negro", trabajo: "chef" },
-    { nombre: "Phoebe", genero: "femenino", cabello: "rubio", trabajo: "música" },
-    { nombre: "Ross", genero: "masculino", cabello: "negro", trabajo: "paleontólogo" },
-    { nombre: "Joey", genero: "masculino", cabello: "castaño", trabajo: "actor" },
-    { nombre: "Chandler", genero: "masculino", cabello: "castaño", trabajo: "oficina" }
+    { nombre: "Rachel", género: "femenino", cabello: "castaño", profesión: "moda", personalidad: "romántica" },
+    { nombre: "Monica", género: "femenino", cabello: "negro", profesión: "chef", personalidad: "competitiva" },
+    { nombre: "Phoebe", género: "femenino", cabello: "rubio", profesión: "música", personalidad: "soñadora" },
+    { nombre: "Ross", género: "masculino", cabello: "negro", profesión: "paleontólogo", personalidad: "serio" },
+    { nombre: "Joey", género: "masculino", cabello: "castaño", profesión: "actor", personalidad: "divertido" },
+    { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina", personalidad: "sarcástico" }
   ];
 }
 
 let personajes = cargarPersonajes();
 
 /* ------------------------------
-   Reglas del sistema experto
+   Reglas en español
 ------------------------------ */
 let reglas = [
-  { atributo: "genero", pregunta: p => `¿Tu personaje es ${p}?` },
-  { atributo: "cabello", pregunta: c => `¿Tu personaje tiene el cabello ${c}?` },
-  { atributo: "trabajo", pregunta: t => `¿Tu personaje trabaja en ${t}?` }
+  { atributo: "género", pregunta: v => `¿Tu personaje es ${v}?` },
+  { atributo: "cabello", pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
+  { atributo: "profesión", pregunta: v => `¿Tu personaje trabaja en ${v}?` },
+  { atributo: "personalidad", pregunta: v => `¿Tu personaje es ${v}?` }
 ];
 
 /* ------------------------------
@@ -85,7 +86,7 @@ class MotorInferencia {
     }
 
     if (this.personajes.length === 0) {
-      this.registrar("❌ No encontré coincidencias, aprenderé un nuevo personaje.");
+      this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje...");
       await this.aprenderNuevo();
       return;
     }
@@ -111,8 +112,7 @@ class MotorInferencia {
     const mapa = { "sí": true, "si": true, "s": true, "no": false, "n": false };
     const afirmativo = mapa[respuesta] ?? false;
 
-    // Sin if: usar filtrado dinámico
-    this.personajes = this.personajes.filter(p => 
+    this.personajes = this.personajes.filter(p =>
       afirmativo ? p[regla.atributo] === valor : p[regla.atributo] !== valor
     );
 
@@ -120,20 +120,18 @@ class MotorInferencia {
   }
 
   async aprenderNuevo() {
-    this.registrar("🔍 Iniciando modo de aprendizaje...");
+    this.registrar("🧠 Modo aprendizaje activado.");
     const nombre = prompt("¿Cuál era el personaje que pensabas?");
     if (!nombre) return;
 
     let nuevo = { nombre: nombre.trim() };
     this.registrar(`Aprendiendo nuevo personaje: ${nuevo.nombre}`);
 
-    // Crear los atributos usando las reglas existentes
     this.reglas.forEach(r => {
       let valor = prompt(`¿Cuál es el valor de '${r.atributo}' para ${nuevo.nombre}?`);
       nuevo[r.atributo] = valor ? valor.toLowerCase().trim() : "";
     });
 
-    // Guardar el nuevo personaje en localStorage
     personajes.push(nuevo);
     localStorage.setItem("personajes_friends", JSON.stringify(personajes));
 
@@ -143,7 +141,7 @@ class MotorInferencia {
 }
 
 /* ------------------------------
-   Control del juego
+   Controlador
 ------------------------------ */
 let motor = new MotorInferencia(personajes, reglas);
 
