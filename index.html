@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (Versión Visual Mejorada)</title>
+<title>Adivina Quién — Friends</title>
 
 <style>
   body {
@@ -20,7 +20,7 @@
     background: #FFFFFF;
     width: 800px;
     border-radius: 15px;
-    box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3); /* Sombra más fuerte para contraste */
     padding: 25px 35px;
     animation: fadeIn 0.8s ease-in-out;
   }
@@ -33,6 +33,7 @@
   /* Estilo para simular el logo de Friends */
   .titulo-friends { text-align: center; margin-bottom: 25px; }
   .titulo-friends span { font-size: 40px; font-weight: 900; letter-spacing: 2px; }
+  /* Bloques de color del logo */
   .titulo-friends .block-rojo { background-color: #E91E23; color: #FFFFFF; padding: 0 5px; border-radius: 5px; }
   .titulo-friends .block-amarillo { background-color: #FABD17; color: #000000; padding: 0 5px; border-radius: 5px; }
   .titulo-friends .block-azul { background-color: #06AFEA; color: #FFFFFF; padding: 0 5px; border-radius: 5px; }
@@ -61,7 +62,7 @@
   }
 
   button:hover {
-    background: #0492cb; /* Azul ligeramente más oscuro */
+    background: #0492cb;
     transform: scale(1.05);
   }
 
@@ -72,7 +73,7 @@
     background: #cc1c20;
   }
   
-  /* Contenedor de imágenes de los candidatos */
+  /* Visualización de imágenes */
   #candidatos-imagenes { 
     display: flex; 
     justify-content: center; 
@@ -120,18 +121,20 @@
     margin-bottom: 20px;
   }
 
+  /* Botón SÍ: Amarillo */
   #opcionesRespuesta button {
     font-size: 1.1em;
     padding: 12px 35px;
-    background: #FABD17; /* Botón SÍ: Amarillo */
-    color: #000000; /* Texto Negro en botón Amarillo */
+    background: #FABD17; 
+    color: #000000; 
   }
 
   #opcionesRespuesta #btnSi:hover { background: #e0a915; }
 
+  /* Botón NO: Rojo */
   #opcionesRespuesta #btnNo {
-    background: #E91E23 !important; /* Botón NO: Rojo */
-    color: #FFFFFF !important; /* Texto Blanco en botón Rojo */
+    background: #E91E23 !important; /* !important asegura prioridad */
+    color: #FFFFFF !important; 
   }
 
   #opcionesRespuesta #btnNo:hover { background: #cc1c20 !important; }
