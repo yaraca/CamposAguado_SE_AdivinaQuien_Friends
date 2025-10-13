@@ -2,28 +2,32 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Adivina Quién — Friends (Versión Aprendida en Español)</title>
+<title>Adivina Quién — Friends (Versión Aprendizaje en Español)</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; background: #f9fafb; padding: 20px; color: #1f2937; }
   #log { background: #111827; color: #e5e7eb; padding: 10px; border-radius: 8px; max-height: 250px; overflow:auto; }
   button { margin: 8px; padding: 10px 15px; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; font-weight: 500; }
+  button:hover { background: #2563eb; }
   h1 { color: #2563eb; }
 </style>
 </head>
 <body>
 <h1>Adivina Quién — Friends (Versión Aprendizaje en Español)</h1>
 
-<p>Juego con inferencia hacia adelante y aprendizaje automático, totalmente en español.</p>
+<p>Juego de inferencia con aprendizaje automático.  
+El sistema intentará adivinar tu personaje de <b>Friends</b> y aprenderá nuevos si no lo conoce.</p>
 
 <button id="btnIniciar">Iniciar Juego</button>
 <button id="btnPreguntar" disabled>Hacer Pregunta</button>
+<button id="btnAprender">Agregar Personaje Nuevo</button>
+
 <div id="pregunta"></div>
 <h3>Registro:</h3>
 <div id="log"></div>
 
 <script>
 /* ------------------------------
-   Base de conocimiento
+   Cargar base de conocimiento
 ------------------------------ */
 function cargarPersonajes() {
   const guardados = localStorage.getItem("personajes_friends");
@@ -141,17 +145,19 @@ class MotorInferencia {
 }
 
 /* ------------------------------
-   Controlador
+   Controlador principal
 ------------------------------ */
 let motor = new MotorInferencia(personajes, reglas);
 
 document.getElementById("btnIniciar").onclick = () => {
   motor = new MotorInferencia(personajes, reglas);
-  motor.registrar("Juego iniciado.");
+  motor.registrar("🎮 Juego iniciado.");
   document.getElementById("btnPreguntar").disabled = false;
 };
 
 document.getElementById("btnPreguntar").onclick = () => motor.hacerPregunta();
+
+document.getElementById("btnAprender").onclick = () => motor.aprenderNuevo();
 </script>
 </body>
 </html>
