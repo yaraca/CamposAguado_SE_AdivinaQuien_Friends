@@ -7,7 +7,396 @@
 <!-- 💅 Estilos generales -->
 <style>
   body {
-    font-family: 'Poppins', sans-serif;
+   <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Adivina Quién — Friends (Versión Visual Mejorada)</title>
+
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif; /* Fuente estándar */
+    background: #FFFFFF; /* Fondo Blanco */
+    color: #000000; /* Texto Negro */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: #FFFFFF;
+    width: 800px; /* Aumentado para las imágenes */
+    border-radius: 15px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.2); /* Sombra más fuerte */
+    padding: 25px 35px;
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Estilo para simular el logo de Friends */
+  .titulo-friends { text-align: center; margin-bottom: 25px; }
+  .titulo-friends span { font-size: 40px; font-weight: 900; letter-spacing: 2px; }
+  .titulo-friends .block-rojo { background-color: #E91E23; color: #FFFFFF; padding: 0 5px; border-radius: 5px; }
+  .titulo-friends .block-amarillo { background-color: #FABD17; color: #000000; padding: 0 5px; border-radius: 5px; }
+  .titulo-friends .block-azul { background-color: #06AFEA; color: #FFFFFF; padding: 0 5px; border-radius: 5px; }
+
+  p {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #000000;
+  }
+
+  #botones {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  button {
+    margin: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #06AFEA; /* Azul principal */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  button:hover {
+    background: #0492cb; /* Azul ligeramente más oscuro */
+    transform: scale(1.05);
+  }
+
+  #btnReset {
+    background: #E91E23; /* Rojo */
+  }
+  #btnReset:hover {
+    background: #cc1c20;
+  }
+  
+  /* Contenedor de imágenes de los candidatos */
+  #candidatos-imagenes { 
+    display: flex; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+    gap: 20px; 
+    margin: 25px 0; 
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 20px;
+  }
+  .personaje-contenedor { 
+    text-align: center; 
+    opacity: 1; 
+    transition: opacity 0.5s, transform 0.5s; 
+  }
+  .personaje-contenedor.descartado { 
+    opacity: 0.25; 
+    transform: scale(0.95); 
+    filter: grayscale(100%);
+  }
+  .personaje-img { 
+    width: 100px; 
+    height: 100px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 4px solid #FABD17; /* Borde Amarillo */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .personaje-nombre { display: block; font-size: 14px; margin-top: 5px; font-weight: 600; }
+
+  #pregunta {
+    text-align: center;
+    font-size: 1.3em;
+    color: #E91E23; /* Rojo para la pregunta */
+    margin-bottom: 20px;
+    font-weight: 700;
+    min-height: 40px;
+    border: 2px dashed #ccc;
+    padding: 10px;
+  }
+
+  #opcionesRespuesta {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+  }
+
+  #opcionesRespuesta button {
+    font-size: 1.1em;
+    padding: 12px 35px;
+    background: #FABD17; /* Botón SÍ: Amarillo */
+    color: #000000; /* Texto Negro en botón Amarillo */
+  }
+
+  #opcionesRespuesta #btnSi:hover { background: #e0a915; }
+
+  #opcionesRespuesta #btnNo {
+    background: #E91E23 !important; /* Botón NO: Rojo */
+    color: #FFFFFF !important; /* Texto Blanco en botón Rojo */
+  }
+
+  #opcionesRespuesta #btnNo:hover { background: #cc1c20 !important; }
+
+  #log {
+    background: #000000; /* Fondo Negro */
+    color: #FFFFFF; /* Texto Blanco */
+    border: 3px solid #FABD17; /* Borde Amarillo */
+    border-radius: 10px;
+    padding: 15px;
+    font-family: monospace;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  #log div {
+    margin-bottom: 6px;
+    border-bottom: 1px dotted #333;
+    padding-bottom: 3px;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #000000;
+  }
+</style>
+</head>
+
+<body>
+  <div class="container">
+    
+    <div class="titulo-friends">
+        <span>F<span class="block-rojo">R</span>I<span class="block-amarillo">E</span>N<span class="block-azul">D</span>S</span>
+        <p style="font-size: 14px; margin-top: 5px;">Adivina Quién (Simulador)</p>
+    </div>
+    
+    <p>Piensa en un personaje de <b>Friends</b>. El sistema te hará preguntas hasta adivinarlo.<br>
+    Si no lo conoce, lo aprenderá automáticamente para la próxima vez. 🧠</p>
+
+    <div id="botones">
+      <button id="btnIniciar">Iniciar juego</button>
+      <button id="btnPreguntar" disabled>Hacer pregunta</button>
+      <button id="btnAprender">Agregar personaje nuevo</button>
+      <button id="btnReset">🔄 Reiniciar aprendizaje</button>
+    </div>
+
+    <div id="candidatos-imagenes">
+        </div>
+
+    <div id="pregunta"></div>
+
+    <div id="opcionesRespuesta" style="display:none;">
+      <button id="btnSi">✅ Sí</button>
+      <button id="btnNo">❌ No</button>
+    </div>
+
+    <h3>🧾 Registro del sistema:</h3>
+    <div id="log"></div>
+
+    <footer>© 2025 — Proyecto de Sistemas Expertos | Yara Campos</footer>
+  </div>
+
+    <script>
+    /* NOTA IMPORTANTE: Para que las imágenes funcionen, debes colocar los archivos (rachel.jpg, 
+       monica.jpg, phoebe.jpg, ross.jpg, joey.jpg, chandler.jpg) en la misma carpeta que tu HTML. */
+
+    // Función para renderizar y actualizar las imágenes de los candidatos
+    let todosLosPersonajes = []; // Variable global para todos los personajes, incluidos los aprendidos
+
+    function renderizarImagenes(candidatosActuales) {
+        const contenedor = document.getElementById("candidatos-imagenes");
+        contenedor.innerHTML = '';
+        
+        const nombresCandidatos = new Set(candidatosActuales.map(c => c.nombre));
+
+        todosLosPersonajes.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'personaje-contenedor';
+            
+            // Si el personaje no está en la lista de candidatos, se atenúa
+            if (!nombresCandidatos.has(p.nombre)) {
+                div.classList.add('descartado');
+            }
+
+            div.innerHTML = `
+                <img src="${p.imagen}" class="personaje-img" alt="${p.nombre}" title="${p.nombre}">
+                <span class="personaje-nombre">${p.nombre}</span>
+            `;
+            contenedor.appendChild(div);
+        });
+    }
+
+    function personajesBase() {
+      return [
+        { nombre: "Rachel", género: "femenino", cabello: "castaño", profesión: "moda", personalidad: "romántica", imagen: "rachel.jpg" },
+        { nombre: "Monica", género: "femenino", cabello: "negro", profesión: "chef", personalidad: "competitiva", imagen: "monica.jpg" },
+        { nombre: "Phoebe", género: "femenino", cabello: "rubio", profesión: "música", personalidad: "soñadora", imagen: "phoebe.jpg" },
+        { nombre: "Ross", género: "masculino", cabello: "negro", profesión: "paleontólogo", personalidad: "serio", imagen: "ross.jpg" },
+        { nombre: "Joey", género: "masculino", cabello: "castaño", profesión: "actor", personalidad: "divertido", imagen: "joey.jpg" },
+        { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina", personalidad: "sarcástico", imagen: "chandler.jpg" }
+      ];
+    }
+
+    function cargarPersonajes() {
+      const guardados = localStorage.getItem("personajes_friends");
+      if (guardados) return JSON.parse(guardados);
+      return personajesBase();
+    }
+
+    todosLosPersonajes = cargarPersonajes(); // Carga todos los personajes (base + aprendidos)
+    
+    let reglas = [
+      { atributo: "género", pregunta: v => `¿Tu personaje es ${v}?` },
+      { atributo: "cabello", pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
+      { atributo: "profesión", pregunta: v => `¿Tu personaje trabaja en ${v}?` },
+      { atributo: "personalidad", pregunta: v => `¿Tu personaje es ${v}?` }
+    ];
+
+    class MotorInferencia {
+      constructor(personajes, reglas) {
+        this.personajes = [...personajes];
+        this.reglas = reglas;
+        this.hechos = {};
+        this.log = [];
+        this.personajeAdivinado = null;
+      }
+
+      registrar(texto) {
+        this.log.unshift(texto);
+        document.getElementById("log").innerHTML = this.log.map(l => `<div>${l}</div>`).join("");
+      }
+
+      seleccionarRegla() {
+        const noAplicadas = this.reglas.filter(r => !(r.atributo in this.hechos));
+        return noAplicadas.length ? noAplicadas[Math.floor(Math.random() * noAplicadas.length)] : null;
+      }
+
+      hacerPregunta() {
+        const preguntaDiv = document.getElementById("pregunta");
+        const opcionesDiv = document.getElementById("opcionesRespuesta");
+        opcionesDiv.style.display = "none";
+
+        if (this.personajes.length === 1) {
+          const adivina = this.personajes[0].nombre;
+          this.personajeAdivinado = adivina;
+          preguntaDiv.textContent = `🤔 ¡Creo que es ${adivina}! ¿Es correcto?`;
+          opcionesDiv.style.display = "flex";
+          this.registrar(`Posible personaje: ${adivina}`);
+          renderizarImagenes(this.personajes); // Marca al final como único candidato
+          return;
+        }
+
+        if (this.personajes.length === 0) {
+          this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje...");
+          this.aprenderNuevo();
+          return;
+        }
+
+        const regla = this.seleccionarRegla();
+        if (!regla) {
+          this.registrar("No hay más preguntas posibles.");
+          this.aprenderNuevo();
+          return;
+        }
+
+        const valores = [...new Set(this.personajes.map(p => p[regla.atributo]))];
+        const valor = valores[Math.floor(Math.random() * valores.length)];
+        const pregunta = regla.pregunta(valor);
+        
+        const btnPreguntar = document.getElementById("btnPreguntar");
+        btnPreguntar.disabled = true; // Deshabilita el botón mientras se responde
+        
+        const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");
+        
+        btnPreguntar.disabled = false; // Habilita de nuevo
+
+        if (respuesta) {
+          this.personajes = this.personajes.filter(p => p[regla.atributo] === valor);
+        } else {
+          this.personajes = this.personajes.filter(p => p[regla.atributo] !== valor);
+        }
+
+        renderizarImagenes(this.personajes); // <--- Actualiza el estado visual de las imágenes
+        this.hacerPregunta();
+      }
+
+      aprenderNuevo() {
+        this.registrar("🧠 Modo aprendizaje activado.");
+        const nombre = prompt("¿Cuál era el personaje que pensabas?");
+        if (!nombre) return;
+
+        let nuevo = { nombre: nombre.trim() };
+        this.registrar(`Aprendiendo personaje: ${nuevo.nombre}`);
+        
+        // Pide también la imagen
+        let imagen = prompt(`Ingresa el nombre del archivo de imagen (ej: 'monica.jpg') para ${nuevo.nombre}?`);
+        nuevo['imagen'] = imagen ? imagen.toLowerCase().trim() : "default.jpg";
+
+
+        this.reglas.forEach(r => {
+          let valor = prompt(`¿Cuál es el valor de '${r.atributo}' para ${nuevo.nombre}?`);
+          nuevo[r.atributo] = valor ? valor.toLowerCase().trim() : "";
+        });
+
+        todosLosPersonajes.push(nuevo); // Añade al listado global
+        localStorage.setItem("personajes_friends", JSON.stringify(todosLosPersonajes));
+        
+        this.registrar(`✅ Personaje aprendido: ${nuevo.nombre}`);
+        alert(`He aprendido un nuevo personaje: ${nuevo.nombre}!`);
+        location.reload(); // Recarga para asegurar que el nuevo personaje se inicialice bien
+      }
+    }
+
+    // Inicializa la visualización de todos los personajes al cargar la página
+    renderizarImagenes(todosLosPersonajes); 
+    
+    let motor = new MotorInferencia(todosLosPersonajes, reglas);
+
+    document.getElementById("btnIniciar").onclick = () => {
+      motor = new MotorInferencia(todosLosPersonajes, reglas);
+      motor.registrar("🎮 Juego iniciado.");
+      document.getElementById("btnPreguntar").disabled = false;
+      document.getElementById("pregunta").textContent = "¡Piensa en tu personaje y haz clic en 'Hacer pregunta'!";
+      renderizarImagenes(motor.personajes);
+    };
+
+    document.getElementById("btnPreguntar").onclick = () => motor.hacerPregunta();
+    document.getElementById("btnAprender").onclick = () => motor.aprenderNuevo();
+
+    document.getElementById("btnSi").onclick = () => {
+      motor.registrar(`✅ Confirmado: era ${motor.personajeAdivinado}`);
+      alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} 😄`);
+      document.getElementById("opcionesRespuesta").style.display = "none";
+      document.getElementById("btnPreguntar").disabled = true;
+    };
+
+    document.getElementById("btnNo").onclick = () => {
+      motor.registrar(`❌ Fallé, no era ${motor.personajeAdivinado}. Aprenderé quién era.`);
+      document.getElementById("opcionesRespuesta").style.display = "none";
+      document.getElementById("btnPreguntar").disabled = true;
+      motor.aprenderNuevo();
+    };
+
+    // 🔄 Reiniciar conocimiento
+    document.getElementById("btnReset").onclick = () => {
+      if (confirm("¿Seguro que quieres borrar todo el conocimiento y reiniciar?")) {
+        localStorage.removeItem("personajes_friends");
+        alert("✅ Base de conocimiento reiniciada. Se restauraron los 6 personajes originales.");
+        location.reload();
+      }
+    };
+  </script>
+</body>
+</html> font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #f3f4f6, #dbeafe);
     color: #1e293b;
     padding: 20px;
