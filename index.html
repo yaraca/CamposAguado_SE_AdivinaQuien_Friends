@@ -170,7 +170,7 @@
     ];
 
     class MotorInferencia {
-      constructor(personajes, reglas) {
+      constructor(personajes, reglas) { /*Inicializa el juego con los personajes base*/
         this.personajes = [...personajes];
         this.reglas = reglas;
         this.hechos = {};
@@ -183,13 +183,13 @@
         document.getElementById("log").innerHTML = this.log.map(l => `<div>${l}</div>`).join("");
       }
 
-      seleccionarRegla() {
+      seleccionarRegla() { /*elige una regla que aún no se haya preguntado para evitar repeticiones*/
         const noAplicadas = this.reglas.filter(r => !(r.atributo in this.hechos));
         return noAplicadas.length ? noAplicadas[Math.floor(Math.random() * noAplicadas.length)] : null;
       }
 
-      hacerPregunta() {
-        const preguntaDiv = document.getElementById("pregunta");
+      hacerPregunta() { /*Ciclo de inferencia*/ 
+        const preguntaDiv = document.getElementById("pregunta"); 
         const opcionesDiv = document.getElementById("opcionesRespuesta");
         opcionesDiv.style.display = "none";
 
@@ -218,7 +218,7 @@
         const valores = [...new Set(this.personajes.map(p => p[regla.atributo]))];
         const valor = valores[Math.floor(Math.random() * valores.length)];
         const pregunta = regla.pregunta(valor);
-        const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");
+        const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");  /*hace la pregunta al usuario para que confirme*/
 
         if (respuesta) {
           this.personajes = this.personajes.filter(p => p[regla.atributo] === valor);
@@ -229,7 +229,8 @@
         this.hacerPregunta();
       }
 
-      aprenderNuevo() {
+      aprenderNuevo() { /*se activa cuando el sistema no logra adivinar el personaje*/
+        /*pide el nombre del personaje y los atributos*/
         this.registrar("🧠 Modo aprendizaje activado.");
         const nombre = prompt("¿Cuál era el personaje que pensabas?");
         if (!nombre) return;
@@ -251,6 +252,7 @@
 
     let motor = new MotorInferencia(personajes, reglas);
 
+    /*botones del juego y sus eventos*/
     document.getElementById("btnIniciar").onclick = () => {
       motor = new MotorInferencia(personajes, reglas);
       motor.registrar("🎮 Juego iniciado.");
