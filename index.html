@@ -292,53 +292,110 @@
   </div>
 
 <script>
+
+
+document.addEventListener('DOMContentLoaded', () => {
   /* =========================================================
-     Datos base + carga/galería
+     Constantes y utilidades de almacenamiento
   ========================================================= */
+  const STORAGE_KEY = 'personajes_friends';
+  const PLACEHOLDER = 'https://via.placeholder.com/90';
+
   function personajesBase() {
-    // RUTAS LOCALES: coloca estos archivos en /imagenes en minúsculas
+    // Asegúrate de que existan estos archivos en /imagenes en minúsculas
     return [
-      { nombre: "Rachel",  género: "femenino",  cabello: "castaño", profesión: "moda",          personalidad: "romántica",  imagen: "./imagenes/rachel.jpg" },
-      { nombre: "Monica",  género: "femenino",  cabello: "negro",   profesión: "chef",          personalidad: "competitiva", imagen: "./imagenes/monica.jpg" },
-      { nombre: "Phoebe",  género: "femenino",  cabello: "rubio",   profesión: "música",        personalidad: "soñadora",    imagen: "./imagenes/phoebe.jpg" },
-      { nombre: "Ross",    género: "masculino", cabello: "negro",   profesión: "paleontólogo",  personalidad: "serio",       imagen: "./imagenes/ross.jpg" },
-      { nombre: "Joey",    género: "masculino", cabello: "castaño", profesión: "actor",         personalidad: "divertido",   imagen: "./imagenes/joey.jpg" },
-      { nombre: "Chandler",género: "masculino", cabello: "castaño", profesión: "oficina",       personalidad: "sarcástico",  imagen: "./imagenes/chandler.jpg" }
+      { nombre: "Rachel",   género: "femenino",  cabello: "castaño", profesión: "moda",         personalidad: "romántica",  imagen: "./imagenes/rachel.jpg" },
+      { nombre: "Monica",   género: "femenino",  cabello: "negro",   profesión: "chef",         personalidad: "competitiva", imagen: "./imagenes/monica.jpg" },
+      { nombre: "Phoebe",   género: "femenino",  cabello: "rubio",   profesión: "música",       personalidad: "soñadora",    imagen: "./imagenes/phoebe.jpg" },
+      { nombre: "Ross",     género: "masculino", cabello: "negro",   profesión: "paleontólogo", personalidad: "serio",       imagen: "./imagenes/ross.jpg" },
+      { nombre: "Joey",     género: "masculino", cabello: "castaño", profesión: "actor",        personalidad: "divertido",   imagen: "./imagenes/joey.jpg" },
+      { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina",      personalidad: "sarcástico",  imagen: "./imagenes/chandler.jpg" }
     ];
   }
 
+  function seedBase() {
+    const base = personajesBase();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(base));
+    return base;
+  }
+
   function cargarPersonajes() {
-    const guardados = localStorage.getItem("personajes_friends");
-    if (guardados) {
-      return JSON.parse(guardados);
-    } else {
-      // Si no existe nada guardado, inicializamos con los personajes base
-      const base = personajesBase();
-      localStorage.setItem("personajes_friends", JSON.stringify(base));
-      return base;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        console.warn('[SE] No había datos en localStorage. Sembrando base…');
+        return seedBase();
+      }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        console.warn('[SE] Datos vacíos/incorrectos. Re-siembro base…');
+        return seedBase();
+      }
+      return parsed;
+    } catch (e) {
+      console.error('[SE] JSON corrupto en localStorage. Re-siembro base…', e);
+      return seedBase();
     }
   }
 
-  let personajes = cargarPersonajes();
+  // variable global del módulo
+  window.personajes = cargarPersonajes();
 
   function mostrarGaleria() {
-    const galeria = document.getElementById("galeria");
-    if (!personajes || personajes.length === 0) {
+    const galeria = document.getElementById('galeria');
+    if (!galeria) {
+      console.error('[SE] No existe <div id="galeria"> en el DOM.');
+      return;
+    }
+    if (!window.personajes || window.personajes.length === 0) {
       galeria.innerHTML = "<p style='text-align:center;color:#6b21a8;'>⚠️ No hay personajes cargados.</p>";
       return;
     }
 
-    galeria.innerHTML = personajes.map(p => `
-      <div class="tarjeta" title="${p.nombre}">
-        <img src="${p.imagen || 'https://via.placeholder.com/90'}" alt="${p.nombre}" />
-        <strong>${p.nombre}</strong><br/>
-        <small>${p.profesión || ''}</small>
-      </div>
-  ` ).join("");
+    galeria.innerHTML = window.personajes.map(p => {
+      // onerror para caer a placeholder si la ruta local falla
+      const img = p.imagen && p.imagen.trim() ? p.imagen : PLACEHOLDER;
+      return `
+        <div class="tarjeta" title="${p.nombre}">
+          <img src="${img}" alt="${p.nombre}" onerror="this.onerror=null;this.src='${PLACEHOLDER}'" />
+          <strong>${p.nombre}</strong><br/>
+          <small>${p.profesión || ''}</small>
+        </div>
+      `;
+    }).join('');
   }
 
-  // Mostrar la galería al cargar la página
+  // Exponer utilidades para usarlas en otros handlers ya existentes
+  window.mostrarGaleria = mostrarGaleria;
+  window.seedBase = seedBase;
+
+  // Mostrar la galería al cargar el DOM
+  console.log('[SE] Inicializando galería con', window.personajes.length, 'personajes…');
   mostrarGaleria();
+
+  // ✅ Hook opcional: si tienes botón Reset, rehúsalo aquí para asegurar reseed visual
+  const btnReset = document.getElementById('btnReset');
+  if (btnReset) {
+    btnReset.onclick = () => {
+      if (confirm("¿Seguro que quieres reiniciar el conocimiento? Se restaurarán los 6 personajes base.")) {
+        window.personajes = seedBase();     // re-siembra base en localStorage
+        mostrarGaleria();                   // refresca UI
+        // Si usas motor de inferencia:
+        if (window.MotorInferencia && window.reglas) {
+          window.motor = new MotorInferencia(window.personajes, window.reglas);
+        }
+        // Limpia UI auxiliar
+        const preg = document.getElementById('pregunta');
+        if (preg) preg.textContent = '';
+        const log = document.getElementById('log');
+        if (log) log.innerHTML = '';
+        alert("✅ Se restauraron los 6 personajes originales de Friends.");
+      }
+    };
+  }
+});
+
+
   /* =========================================================
      Reglas
   ========================================================= */
