@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  let motor = new MotorInferencia(personajes, reglas);
+  let motor = new MotorInferencia(window.personajes, reglas);
 
   /* =========================================================
      Modal + helpers (carga imagen Base64, guardar, etc.)
@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
      Eventos de botones
   ========================================================= */
   document.getElementById("btnIniciar").onclick = () => {
-    motor = new MotorInferencia(personajes, reglas);
+    motor = new MotorInferencia(window.personajes, reglas);
     motor.registrar("🎮 Juego iniciado.");
     document.getElementById("btnPreguntar").disabled = false;
     document.getElementById("pregunta").textContent = "";
@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem("personajes_friends", JSON.stringify(personajes));
       mostrarGaleria();
       alert("✅ Se restauraron los 6 personajes originales de Friends.");
-      motor = new MotorInferencia(personajes, reglas);
+      motor = new MotorInferencia(window.personajes, reglas);
       document.getElementById("pregunta").textContent = "";
       document.getElementById("log").innerHTML = "";
     }
