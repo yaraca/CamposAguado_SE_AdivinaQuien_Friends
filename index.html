@@ -318,365 +318,252 @@
   </div>
 
 <script>
-// =========================================================
-// Esperar a que el HTML esté listo
-// =========================================================
-document.addEventListener('DOMContentLoaded', () => { // Esperar a que el html esté listo
 
-  /* =========================================================
-     Constantes y utilidades de almacenamiento
-  ========================================================= */
-  const STORAGE_KEY = 'personajes_friends'; // clave en localStorage
-  const PLACEHOLDER = 'https://via.placeholder.com/90'; // imagen por defecto
+/* =========================================================
+   Claves y constantes globales
+========================================================= */
+const STORAGE_KEY = 'personajes_friends';
+const PLACEHOLDER = 'https://via.placeholder.com/90';
 
-  function personajesBase() {
-    // Personajes iniciales de Friends
-    return [
-      //se agregan los personajes base con sus atributos e imagenes locales
-      //estos se guardan en una cadena JSON en el localStorage
-      //cada personaje tiene nombre, género, color de cabello, profesión, personalidad e imagen
-      //esto nos sirve para que el sistema pueda reconocerlos y hacer preguntas sobre ellos
-      { nombre: "Rachel",   género: "femenino",  cabello: "castaño", profesión: "moda",         personalidad: "romántica",  imagen: "./imagen/rachel.jpg" },
-      { nombre: "Monica",   género: "femenino",  cabello: "negro",   profesión: "chef",         personalidad: "competitiva", imagen: "./imagen/monica.jpg" },
-      { nombre: "Phoebe",   género: "femenino",  cabello: "rubio",   profesión: "música",       personalidad: "soñadora",    imagen: "./imagen/phoebe.jpg" },
-      { nombre: "Ross",     género: "masculino", cabello: "negro",   profesión: "paleontólogo", personalidad: "serio",       imagen: "./imagen/ross.jpg" },
-      { nombre: "Joey",     género: "masculino", cabello: "castaño", profesión: "actor",        personalidad: "divertido",   imagen: "./imagen/joey.jpg" },
-      { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina",      personalidad: "sarcástico",  imagen: "./imagen/chandler.jpg" }
-    ];
+/* =========================================================
+   Datos base
+========================================================= */
+function personajesBase() {
+  // Asegúrate de que existan EXACTAMENTE así (minúsculas) en /imagenes
+  return [
+    { nombre: "Rachel",   género: "femenino",  cabello: "castaño", profesión: "moda",         personalidad: "romántica",  imagen: "imagen/rachel.jpg" },
+    { nombre: "Monica",   género: "femenino",  cabello: "negro",   profesión: "chef",         personalidad: "competitiva", imagen: "imagen/monica.jpg" },
+    { nombre: "Phoebe",   género: "femenino",  cabello: "rubio",   profesión: "música",       personalidad: "soñadora",    imagen: "imagen/phoebe.jpg" },
+    { nombre: "Ross",     género: "masculino", cabello: "negro",   profesión: "paleontólogo", personalidad: "serio",       imagen: "imagen/ross.jpg" },
+    { nombre: "Joey",     género: "masculino", cabello: "castaño", profesión: "actor",        personalidad: "divertido",   imagen: "imagen/joey.jpg" },
+    { nombre: "Chandler", género: "masculino", cabello: "castaño", profesión: "oficina",      personalidad: "sarcástico",  imagen: "imagen/chandler.jpg" }
+  ];
+}
+
+/* =========================================================
+   Carga/siembra y galería (GLOBAL)
+========================================================= */
+function seedBase() {
+  const base = personajesBase();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(base));
+  return base;
+}
+
+function cargarPersonajes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return seedBase();
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr) || arr.length === 0) return seedBase();
+    return arr;
+  } catch {
+    return seedBase();
   }
+}
 
-  function seedBase() {
-    // Sembrar la base inicial en localStorage
-    const base = personajesBase(); // obtener personajes base
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(base)); // guardar en localStorage
-    return base; // retornar base (personajes base)
-  }
+// 🔴 Hacemos personajes GLOBAL con `var` para que lo vean todos los handlers
+var personajes = cargarPersonajes();
 
-  function cargarPersonajes() {
-    // Cargar personajes desde localStorage o sembrar base si no hay datos válidos
-    try {
-      // intentar cargar desde localStorage
-      const raw = localStorage.getItem(STORAGE_KEY); // obtener datos crudos
-      if (!raw) { // si no hay datos
-        console.warn('[SE] No había datos en localStorage. Sembrando base…');
-        return seedBase();
-      }
-      const parsed = JSON.parse(raw);  //analizar JSON
-      if (!Array.isArray(parsed) || parsed.length === 0) { // validar datos
-        console.warn('[SE] Datos vacíos/incorrectos. Re-siembro base…'); 
-        return seedBase();
-      }
-      return parsed;
-    } catch (e) { // error al analizar JSON
-      console.error('[SE] JSON corrupto en localStorage. Re-siembro base…', e); 
-      return seedBase();
-    }
-  }
-
-  // variable global del módulo
-  window.personajes = cargarPersonajes(); // cargar personajes al iniciar
-
-
-  function mostrarGaleria() {
-    // Mostrar personajes en la galería
-    const galeria = document.getElementById('galeria'); // obtener contenedor
-    if (!galeria) { //si no existe el contenedor
-      console.error('[SE] No existe <div id="galeria"> en el DOM.'); //notificar error
-      return;
-    }
-    if (!window.personajes || window.personajes.length === 0) { //si no hay personajes
-      galeria.innerHTML = "<p style='text-align:center;color:#6b21a8;'>⚠️ No hay personajes cargados.</p>"; //mostrar mensaje
-      return;
-    }
-
-    galeria.innerHTML = window.personajes.map(p => { //mapear personajes a HTML
-      // onerror para caer a placeholder si la ruta local falla
-      const img = p.imagen && p.imagen.trim() ? p.imagen : PLACEHOLDER; //usar las imagenes locales
-      return `
-        <div class="tarjeta" title="${p.nombre}"> 
-          <img src="${img}" alt="${p.nombre}" onerror="this.onerror=null;this.src='${PLACEHOLDER}'" /> 
-          <strong>${p.nombre}</strong><br/> 
+function mostrarGaleria() {
+  const galeria = document.getElementById('galeria');
+  if (!galeria) return;
+  galeria.innerHTML = (personajes && personajes.length)
+    ? personajes.map(p => `
+        <div class="tarjeta" title="${p.nombre}">
+          <img src="${p.imagen || PLACEHOLDER}" alt="${p.nombre}"
+               onerror="this.onerror=null;this.src='${PLACEHOLDER}'" />
+          <strong>${p.nombre}</strong><br/>
           <small>${p.profesión || ''}</small>
         </div>
-      `;
-    }).join('');
+      `).join('')
+    : "<p style='text-align:center;color:#6b21a8;'>⚠️ No hay personajes cargados.</p>";
+}
+
+/* =========================================================
+   Reglas (GLOBAL)
+========================================================= */
+var reglas = [
+  { atributo: "género",       pregunta: v => `¿Tu personaje es ${v}?` },
+  { atributo: "cabello",      pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
+  { atributo: "profesión",    pregunta: v => `¿Tu personaje trabaja en ${v}?` },
+  { atributo: "personalidad", pregunta: v => `¿Tu personaje es ${v}?` }
+];
+
+/* =========================================================
+   Motor de inferencia
+========================================================= */
+class MotorInferencia {
+  constructor(personajes, reglas) {
+    this.personajes = [...personajes];
+    this.reglas = reglas;
+    this.hechos = {};
+    this.log = [];
+    this.personajeAdivinado = null;
   }
+  registrar(texto) {
+    this.log.unshift(texto);
+    const logDiv = document.getElementById("log");
+    if (logDiv) logDiv.innerHTML = this.log.map(l => `<div>${l}</div>`).join("");
+  }
+  seleccionarRegla() {
+    const noAplicadas = this.reglas.filter(r => !(r.atributo in this.hechos));
+    return noAplicadas.length ? noAplicadas[Math.floor(Math.random() * noAplicadas.length)] : null;
+  }
+  hacerPregunta() {
+    const preguntaDiv = document.getElementById("pregunta");
+    const opcionesDiv = document.getElementById("opcionesRespuesta");
+    if (opcionesDiv) opcionesDiv.style.display = "none";
 
-  // Exponer utilidades para usarlas en otros handlers ya existentes
-  window.mostrarGaleria = mostrarGaleria; // función para refrescar galería
-  window.seedBase = seedBase; // función para re-sembrar base
+    if (this.personajes.length === 1) {
+      const adivina = this.personajes[0].nombre;
+      this.personajeAdivinado = adivina;
+      if (preguntaDiv) preguntaDiv.textContent = `🤔 Creo que es ${adivina}. ¿Es correcto?`;
+      if (opcionesDiv) opcionesDiv.style.display = "flex";
+      this.registrar(`Posible personaje: ${adivina}`);
+      return;
+    }
 
-  // Mostrar la galería al cargar el DOM (clics, movimientos, etc.)
-  console.log('[SE] Inicializando galería con', window.personajes.length, 'personajes…'); 
-  mostrarGaleria(); // mostrar galería inicial
+    if (this.personajes.length === 0) {
+      this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje…");
+      this.aprenderNuevo();
+      return;
+    }
 
-  // Manejar botón de reinicio
-  const btnReset = document.getElementById('btnReset'); // obtener botón
-  if (btnReset) { //si el botón existe
-    btnReset.onclick = () => { //asignar evento onclick
-      if (confirm("¿Seguro que quieres reiniciar el conocimiento? Se restaurarán los 6 personajes base.")) { //confirmar acción
-        window.personajes = seedBase();     // re-siembra base en localStorage
-        mostrarGaleria();                   // refresca la interfaz de ususario (UI), que es lo mismo que llamar a window.mostrarGaleria() osea mostrar los personajes
-        // Si usas motor de inferencia:
-        if (window.MotorInferencia && window.reglas) { 
-          // reiniciar motor si existe
-          window.motor = new MotorInferencia(window.personajes, window.reglas); // reiniciar motor
-        }
-        // Limpia UI auxiliar
-        const preg = document.getElementById('pregunta'); // obtener contenedor de pregunta
-        if (preg) preg.textContent = ''; // limpiar pregunta
-        const log = document.getElementById('log'); // obtener contenedor de log
-        if (log) log.innerHTML = ''; // limpiar log
-        alert("✅ Se restauraron los 6 personajes originales de Friends."); // notificar éxito
-      }
-    };
+    const regla = this.seleccionarRegla();
+    if (!regla) {
+      this.registrar("No hay más preguntas posibles. Aprenderé un nuevo personaje…");
+      this.aprenderNuevo();
+      return;
+    }
+
+    const valores = [...new Set(this.personajes.map(p => p[regla.atributo]).filter(Boolean))];
+    if (valores.length === 0) {
+      this.hechos[regla.atributo] = true;
+      this.hacerPregunta();
+      return;
+    }
+
+    const valor = valores[Math.floor(Math.random() * valores.length)];
+    const pregunta = regla.pregunta(valor);
+    this.registrar(`Pregunta: ${pregunta}`);
+    const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)");
+
+    this.personajes = respuesta
+      ? this.personajes.filter(p => p[regla.atributo] === valor)
+      : this.personajes.filter(p => p[regla.atributo] !== valor);
+
+    this.hacerPregunta();
+  }
+  aprenderNuevo() {
+    this.registrar("🧠 Modo aprendizaje activado (formulario).");
+    abrirModalNuevoPersonaje();
+  }
+}
+
+// Motor GLOBAL
+var motor = new MotorInferencia(personajes, reglas);
+
+/* =========================================================
+   Modal + helpers
+========================================================= */
+function abrirModalNuevoPersonaje(prefill = {}) {
+  document.getElementById("modalFondo").style.display = "flex";
+  const set = (id, v) => document.getElementById(id).value = (v ?? "");
+  set("inpNombre",        prefill.nombre);
+  set("inpGenero",        prefill["género"]);
+  set("inpCabello",       prefill["cabello"]);
+  set("inpProfesion",     prefill["profesión"]);
+  set("inpPersonalidad",  prefill["personalidad"]);
+  const prev = document.getElementById("prevImagen");
+  prev.src = ""; prev.style.display = "none";
+  document.getElementById("inpImagen").value = "";
+}
+function cerrarModal() {
+  document.getElementById("modalFondo").style.display = "none";
+}
+function leerImagenComoDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = reject;
+    fr.readAsDataURL(file);
+  });
+}
+async function guardarPersonajeDesdeModal() {
+  const nombre       = document.getElementById("inpNombre").value.trim();
+  const genero       = document.getElementById("inpGenero").value.trim().toLowerCase();
+  const cabello      = document.getElementById("inpCabello").value.trim().toLowerCase();
+  const profesion    = document.getElementById("inpProfesion").value.trim().toLowerCase();
+  const personalidad = document.getElementById("inpPersonalidad").value.trim().toLowerCase();
+  if (!nombre) { alert("Por favor escribe el nombre del personaje."); return; }
+
+  let imagenDataUrl = "";
+  const file = document.getElementById("inpImagen").files[0];
+  if (file) { try { imagenDataUrl = await leerImagenComoDataURL(file); } catch { alert("No se pudo leer la imagen."); } }
+
+  const nuevo = { nombre, "género": genero, "cabello": cabello, "profesión": profesion, "personalidad": personalidad, imagen: imagenDataUrl };
+  const idx = personajes.findIndex(p => p.nombre.toLowerCase() === nombre.toLowerCase());
+  if (idx >= 0) personajes[idx] = nuevo; else personajes.push(nuevo);
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(personajes));
+  mostrarGaleria();
+  cerrarModal();
+  alert(`✅ Personaje "${nombre}" guardado correctamente.`);
+}
+
+// Previsualizar imagen elegida
+document.addEventListener("change", (e) => {
+  if (e.target.id === "inpImagen") {
+    const file = e.target.files[0];
+    const prev = document.getElementById("prevImagen");
+    if (file) { prev.src = URL.createObjectURL(file); prev.style.display = "block"; }
+    else { prev.src = ""; prev.style.display = "none"; }
   }
 });
 
+/* =========================================================
+   Eventos (un solo Reset)
+========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+  mostrarGaleria();
 
-
-  /* =========================================================
-     Reglas
-  ========================================================= */
-  const reglas = [
-    { atributo: "género",       pregunta: v => `¿Tu personaje es ${v}?` }, 
-    { atributo: "cabello",      pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
-    { atributo: "profesión",    pregunta: v => `¿Tu personaje trabaja en ${v}?` },
-    { atributo: "personalidad", pregunta: v => `¿Tu personaje es ${v}?` }
-  ];
-  
-
-  /* =========================================================
-     Motor de inferencia (encadenamiento hacia adelante)
-  ========================================================= */
-  class MotorInferencia {
-    constructor(personajes, reglas) { //inicializar motor
-      this.personajes = [...personajes]; // copia de personajes
-      this.reglas = reglas; // reglas disponibles
-      this.hechos = {}; // hechos conocidos
-      this.log = []; // registro de acciones
-      this.personajeAdivinado = null; // personaje adivinado
-    }
-
-    registrar(texto) {
-      // registrar en el log, que es el registro de acciones
-      this.log.unshift(texto); // agregar al inicio
-      document.getElementById("log").innerHTML = this.log.map(l => `<div>${l}</div>`).join(""); // actualizar UI (interfaz de usuario)
-    }
-
-    seleccionarRegla() {
-      // seleccionar una regla no aplicada
-      const noAplicadas = this.reglas.filter(r => !(r.atributo in this.hechos)); // filtrar reglas no aplicadas para no repetir preguntas
-      return noAplicadas.length ? noAplicadas[Math.floor(Math.random() * noAplicadas.length)] : null; // retornar regla aleatoria o null
-    }
-
-    hacerPregunta() {
-      // hacer una pregunta al usuario
-      const preguntaDiv = document.getElementById("pregunta"); // contenedor de pregunta
-      const opcionesDiv = document.getElementById("opcionesRespuesta"); // contenedor de opciones
-      opcionesDiv.style.display = "none"; // ocultar opciones inicialmente
-
-      if (this.personajes.length === 1) { //si queda un solo personaje
-        const adivina = this.personajes[0].nombre; // obtener nombre del personaje para adivinar
-        this.personajeAdivinado = adivina; // guardar personaje adivinado
-        preguntaDiv.textContent = `🤔 Creo que es ${adivina}. ¿Es correcto?`; // mostrar pregunta de adivinanza
-        opcionesDiv.style.display = "flex"; // mostrar opciones de respuesta
-        this.registrar(`Posible personaje: ${adivina}`); // registrar posible personaje
-        return; 
-      }
-
-      if (this.personajes.length === 0) { //si no quedan personajes
-        this.registrar("❌ No encontré coincidencias. Aprenderé un nuevo personaje…");
-        this.aprenderNuevo(); // iniciar aprendizaje
-        return;
-      }
-
-      const regla = this.seleccionarRegla(); // seleccionar regla
-      if (!regla) { //si no hay reglas disponibles
-        this.registrar("No hay más preguntas posibles. Aprenderé un nuevo personaje…"); //el sistema no puede hacer más preguntas y debe aprender
-        this.aprenderNuevo(); // iniciar aprendizaje
-        return;
-      }
-
-      const valores = [...new Set(this.personajes.map(p => p[regla.atributo]).filter(Boolean))]; // obtener valores únicos del atributo de la regla
-      if (valores.length === 0) { 
-        // si no hay valores para esa regla, pasa a otra
-        this.hechos[regla.atributo] = true; // marcar como “preguntada”
-        this.hacerPregunta(); //hacer otra pregunta
-        return;
-      }
-
-      const valor = valores[Math.floor(Math.random() * valores.length)]; // seleccionar valor aleatorio para la pregunta 
-      const pregunta = regla.pregunta(valor); // generar texto de la pregunta
-      this.registrar(`Pregunta: ${pregunta}`); // registrar pregunta en el log
-      const respuesta = confirm(pregunta + " (Aceptar = Sí, Cancelar = No)"); // mostrar pregunta al usuario con confirmacion de sí o no
-
-      if (respuesta) { //si la respuesta es sí
-        this.personajes = this.personajes.filter(p => p[regla.atributo] === valor); // filtrar personajes que cumplen la condición
-      } else { //si la respuesta es no
-        this.personajes = this.personajes.filter(p => p[regla.atributo] !== valor); // filtrar personajes que no cumplen la condición
-      }
-
-      this.hacerPregunta(); // repetir proceso
-    }
-
-    // Ahora el aprendizaje abre el modal para agregar un nuevo personaje
-    aprenderNuevo() {
-      //cuando el sistema no puede adivinar, abre el modal para agregar un nuevo personaje
-      this.registrar(" Modo aprendizaje activado (formulario)."); // registrar modo aprendizaje
-      abrirModalNuevoPersonaje(); // abrir modal para agregar personaje
-    }
-  }
-
-  let motor = new MotorInferencia(window.personajes, reglas); // instancia inicial del motor de inferencia
-
-  /* =========================================================
-     Modal + helpers (carga imagen Base64, guardar, etc.)
-  ========================================================= */
-  function abrirModalNuevoPersonaje(prefill = {}) { // abrir modal para agregar personaje
-    document.getElementById("modalFondo").style.display = "flex"; // mostrar modal
-
-    const set = (id, v) => document.getElementById(id).value = (v ?? ""); // función auxiliar para setear valores
-    set("inpNombre",        prefill.nombre); // rellenar campos si hay datos previos
-    set("inpGenero",        prefill["género"]); //rellenar campos si hay datos previos
-    set("inpCabello",       prefill["cabello"]); //rellenar campos si hay datos previos
-    set("inpProfesion",     prefill["profesión"]); //rellenar campos si hay datos previos
-    set("inpPersonalidad",  prefill["personalidad"]); //rellenar campos si hay datos previos
-
-    const prev = document.getElementById("prevImagen"); // previsualización de imagen
-    prev.src = ""; // limpiar previsualización
-    prev.style.display = "none"; // ocultar previsualización
-    document.getElementById("inpImagen").value = ""; // limpiar input de archivo
-  }
-
-  function cerrarModal() { // cerrar modal
-    document.getElementById("modalFondo").style.display = "none"; // ocultar modal
-  }
-
-  function leerImagenComoDataURL(file) { // leer imagen como DataURL (Base64) para almacenamiento 
-    //convierte la imagen en una cadena Base64 para guardarla en localStorage porque localStorage solo acepta cadenas de texto
-    return new Promise((resolve, reject) => {  //la función devuelve una promesa y no se detiene mientras se lee la imagen
-      const fr = new FileReader();   //se crea un lector de archivos que nos permite leer el contenido del archivo
-      fr.onload = () => resolve(fr.result); //cuando se carga la imagen, se resuelve la promesa con el resultado (cadena Base64)
-      fr.onerror = reject; //si hay un error, se rechaza la promesa
-      fr.readAsDataURL(file); //se lee el archivo como DataURL
-    });
-  }
-
-  async function guardarPersonajeDesdeModal() { // guardar personaje desde el modal
-    // es para agregar un nuevo personaje y que se guarde en localStorage
-    const nombre       = document.getElementById("inpNombre").value.trim(); // obtener valores del formulario
-    const genero       = document.getElementById("inpGenero").value.trim().toLowerCase(); //convertir a minusculas para estandarizar
-    const cabello      = document.getElementById("inpCabello").value.trim().toLowerCase(); //convertir a minusculas para estandarizar
-    const profesion    = document.getElementById("inpProfesion").value.trim().toLowerCase(); //convertir a minusculas para estandarizar
-    const personalidad = document.getElementById("inpPersonalidad").value.trim().toLowerCase(); //convertir a minusculas para estandarizar
-
-    if (!nombre) { //validar nombre
-      alert("Por favor escribe el nombre del personaje."); //alerta si no hay nombre
-      return;
-    }
-
-    let imagenDataUrl = ""; // variable para almacenar la imagen en Base64
-    const file = document.getElementById("inpImagen").files[0]; // obtener archivo de imagen
-    if (file) { //si hay un archivo seleccionado
-      try { //intentar leer la imagen
-        imagenDataUrl = await leerImagenComoDataURL(file); //leer imagen como DataURL (Base64)
-      } catch (e) { //error al leer imagen
-        console.error("Error leyendo imagen:", e); //log de error
-        alert("No se pudo leer la imagen. Intenta con otro archivo.");
-      }
-    }
-
-    const nuevo = {
-      // nuevo personaje
-      nombre, // nombre
-      "género": genero, // género
-      "cabello": cabello, // cabello
-      "profesión": profesion, // profesión
-      "personalidad": personalidad, // personalidad
-      imagen: imagenDataUrl // si no hay imagen, queda ""
-    };
-
-    const existe = personajes.some(p => p.nombre.toLowerCase() === nombre.toLowerCase()); // verificar si ya existe personaje con mismo nombre
-    if (existe) { //si ya existe
-      if (!confirm(`Ya existe un personaje llamado "${nombre}". ¿Deseas sobrescribirlo?`)) { 
-        return;
-      }
-      personajes = personajes.map(p => p.nombre.toLowerCase() === nombre.toLowerCase() ? nuevo : p); //sobrescribir personaje existente
-    } else { //si no existe
-      personajes.push(nuevo); // agregar nuevo personaje
-    }
-
-    localStorage.setItem("personajes_friends", JSON.stringify(personajes));  // guardar en localStorage
-    mostrarGaleria(); // refrescar galería
-    cerrarModal(); // cerrar modal
-    alert(`✅ Personaje "${nombre}" guardado correctamente.`); // notificar éxito
-  }
-
-  // Previsualizar imagen elegida en el modal 
-  document.addEventListener("change", (e) => { //escuchar cambios en el documento
-    if (e.target.id === "inpImagen") { //si el cambio es en el input de imagen
-      const file = e.target.files[0]; // obtener archivo seleccionado
-      const prev = document.getElementById("prevImagen"); // previsualización
-      if (file) { //si hay un archivo
-        const url = URL.createObjectURL(file); // crear URL temporal para previsualización
-        prev.src = url; // asignar URL a la previsualización
-        prev.style.display = "block"; // mostrar previsualización
-      } else { //si no hay archivo
-        prev.src = ""; // limpiar previsualización
-        prev.style.display = "none"; // ocultar previsualización
-      }
-    }
-  });
-
-  /* =========================================================
-     Eventos de botones
-  ========================================================= */
-  document.getElementById("btnIniciar").onclick = () => { // iniciar juego
-    motor = new MotorInferencia(window.personajes, reglas); // nueva instancia del motor
-    motor.registrar(" Juego iniciado."); // registrar inicio
-    document.getElementById("btnPreguntar").disabled = false; // habilitar botón de preguntar
-    document.getElementById("pregunta").textContent = ""; // limpiar pregunta
-    document.getElementById("opcionesRespuesta").style.display = "none"; // ocultar opciones de respuesta
+  document.getElementById("btnIniciar").onclick = () => {
+    motor = new MotorInferencia(personajes, reglas);
+    motor.registrar("🎮 Juego iniciado.");
+    document.getElementById("btnPreguntar").disabled = false;
+    document.getElementById("pregunta").textContent = "";
+    document.getElementById("opcionesRespuesta").style.display = "none";
   };
 
-  document.getElementById("btnPreguntar").onclick = () => motor.hacerPregunta(); // hacer pregunta al hacer clic
+  document.getElementById("btnPreguntar").onclick = () => motor.hacerPregunta();
+  document.getElementById("btnAprender").onclick  = () => abrirModalNuevoPersonaje();
+  document.getElementById("btnGuardarModal").onclick = guardarPersonajeDesdeModal;
+  document.getElementById("btnCancelarModal").onclick = cerrarModal;
 
-  // Abrir modal manualmente para agregar personaje
-  document.getElementById("btnAprender").onclick = () => abrirModalNuevoPersonaje(); // abrir modal al hacer clic
-
-  // Confirmación cuando el sistema cree haber adivinado
-  document.getElementById("btnSi").onclick = () => { // confirmar adivinanza correcta
-    motor.registrar(`✅ Confirmado: era ${motor.personajeAdivinado}`); // registrar acierto
-    alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} `); // notificar éxito
-    document.getElementById("opcionesRespuesta").style.display = "none"; // ocultar opciones de respuesta
-    document.getElementById("pregunta").textContent = ""; // limpiar pregunta
+  document.getElementById("btnSi").onclick = () => {
+    motor.registrar(`✅ Confirmado: era ${motor.personajeAdivinado}`);
+    alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} 😄`);
+    document.getElementById("opcionesRespuesta").style.display = "none";
+    document.getElementById("pregunta").textContent = "";
+  };
+  document.getElementById("btnNo").onclick = () => {
+    motor.registrar(`❌ Fallé, no era ${motor.personajeAdivinado}. Aprenderé quién era.`);
+    document.getElementById("opcionesRespuesta").style.display = "none";
+    document.getElementById("pregunta").textContent = "";
+    motor.aprenderNuevo();
   };
 
-  document.getElementById("btnNo").onclick = () => { // confirmar adivinanza incorrecta
-    motor.registrar(`❌ Fallé, no era ${motor.personajeAdivinado}. Aprenderé quién era.`); // registrar fallo de adivinanza
-    document.getElementById("opcionesRespuesta").style.display = "none"; // ocultar opciones de respuesta
-    document.getElementById("pregunta").textContent = ""; // limpiar pregunta
-    motor.aprenderNuevo(); // iniciar aprendizaje
-  };
-
-  // Reiniciar conocimiento
-  document.getElementById("btnReset").onclick = () => { // reiniciar conocimiento
-    if (confirm("¿Seguro que quieres reiniciar el conocimiento (sin borrar las imágenes base)?")) { //confirmar acción
-      // Limpia solo los personajes agregados, no los base
-      personajes = personajesBase(); // restaurar personajes base
-      localStorage.setItem("personajes_friends", JSON.stringify(personajes)); // guardar en localStorage
-      mostrarGaleria(); // refresca la galeria con los personajes iniciales
-      alert("✅ Se restauraron los 6 personajes originales de Friends."); 
-      motor = new MotorInferencia(window.personajes, reglas); // reiniciar motor
-      document.getElementById("pregunta").textContent = ""; // limpiar pregunta
-      document.getElementById("log").innerHTML = ""; // limpiar log
+  // 🔄 Reset (sin borrar imágenes base)
+  document.getElementById("btnReset").onclick = () => {
+    if (confirm("¿Seguro que quieres reiniciar el conocimiento? Se restaurarán los 6 personajes base.")) {
+      personajes = personajesBase(); // vuelve a las rutas locales
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(personajes));
+      mostrarGaleria();
+      motor = new MotorInferencia(personajes, reglas);
+      document.getElementById("pregunta").textContent = "";
+      document.getElementById("log").innerHTML = "";
+      alert("✅ Se restauraron los 6 personajes originales de Friends.");
     }
   };
-
-  // Botones del modal
-  document.getElementById("btnGuardarModal").onclick = guardarPersonajeDesdeModal; // guardar personaje
-  document.getElementById("btnCancelarModal").onclick = cerrarModal; // cancelar modal
-</script> 
-</body>
-</html>
+});
+</script>
