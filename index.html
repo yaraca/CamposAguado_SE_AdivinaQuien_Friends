@@ -309,24 +309,36 @@
 
   function cargarPersonajes() {
     const guardados = localStorage.getItem("personajes_friends");
-    if (guardados) return JSON.parse(guardados);
-    return personajesBase();
+    if (guardados) {
+      return JSON.parse(guardados);
+    } else {
+      // Si no existe nada guardado, inicializamos con los personajes base
+      const base = personajesBase();
+      localStorage.setItem("personajes_friends", JSON.stringify(base));
+      return base;
+    }
   }
 
   let personajes = cargarPersonajes();
 
   function mostrarGaleria() {
     const galeria = document.getElementById("galeria");
+    if (!personajes || personajes.length === 0) {
+      galeria.innerHTML = "<p style='text-align:center;color:#6b21a8;'>⚠️ No hay personajes cargados.</p>";
+      return;
+    }
+
     galeria.innerHTML = personajes.map(p => `
       <div class="tarjeta" title="${p.nombre}">
         <img src="${p.imagen || 'https://via.placeholder.com/90'}" alt="${p.nombre}" />
         <strong>${p.nombre}</strong><br/>
         <small>${p.profesión || ''}</small>
       </div>
-    `).join("");
+  ` ).join("");
   }
-  mostrarGaleria();
 
+  // Mostrar la galería al cargar la página
+  mostrarGaleria();
   /* =========================================================
      Reglas
   ========================================================= */
