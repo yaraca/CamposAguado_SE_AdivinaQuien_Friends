@@ -179,7 +179,7 @@
     padding: 12px;
   }
 
-  #modalCard {
+  #modalCard { 
     background: #fff;
     width: 560px;
     border-radius: 18px;
@@ -268,14 +268,14 @@
 <body>
   <div class="container">
     <img id="logo" src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Friends_logo.svg" alt="Logo Friends" />
-    <h1>🎯 Adivina Quién — Friends</h1>
-    <p style="text-align:center">Piensa en un personaje de <b>Friends</b>. El sistema intentará adivinarlo. Si no lo conoce, ¡lo aprenderá! 🧠</p>
+    <h1>Adivina Quién — Friends</h1>
+    <p style="text-align:center">Piensa en un personaje de <b>Friends</b>. El sistema intentará adivinarlo. Si no lo conoce, ¡lo aprenderá! </p>
 
     <div id="botones">
-      <button id="btnIniciar">🎮 Iniciar</button>
-      <button id="btnPreguntar" disabled>❓ Preguntar</button>
-      <button id="btnAprender">➕ Agregar personaje</button>
-      <button id="btnReset">🔄 Reiniciar</button>
+      <button id="btnIniciar"> INICIAR</button>
+      <button id="btnPreguntar" disabled> PREGUNTAR</button>
+      <button id="btnAprender"> AGREGAR PERSONAJE</button>
+      <button id="btnReset"> REINICIAR</button>
     </div>
 
     <div id="pregunta"></div>
@@ -296,7 +296,7 @@
   <!-- Modal agregar personaje -->
   <div id="modalFondo">
     <div id="modalCard">
-      <h2>➕ Agregar nuevo personaje</h2>
+      <h2> Agregar nuevo personaje</h2>
       <p style="margin:0 0 15px;color:#374151">Completa los datos y (opcional) sube una imagen.</p>
 
       <div class="gridForm">
@@ -307,7 +307,7 @@
         <label style="grid-column:1/-1;">Personalidad <input id="inpPersonalidad" type="text" placeholder="divertido, serio, sarcástico..." /></label>
 
         <div class="filaImagen">
-          <label id="btnFileLabel" for="inpImagen">📷 Elegir imagen</label>
+          <label id="btnFileLabel" for="inpImagen"> Elegir imagen</label>
           <input id="inpImagen" type="file" accept="image/*" style="display:none;" />
           <img id="prevImagen" src="" alt="Previsualización" />
           <small style="color:#6b7280;">(Opcional) JPG/PNG recomendada</small>
@@ -323,7 +323,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ===== Reglas (pueden ir aquí sin problema) =====
+  // ===== Reglas =====
   const reglas = [
     { atributo: "género",       pregunta: v => `¿Tu personaje es ${v}?` },
     { atributo: "cabello",      pregunta: v => `¿Tu personaje tiene el cabello ${v}?` },
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (this.personajes.length === 1) {
         const adivina = this.personajes[0].nombre;
         this.personajeAdivinado = adivina;
-        preguntaDiv.textContent = `🤔 Creo que es ${adivina}. ¿Es correcto?`;
+        preguntaDiv.textContent = ` Creo que es ${adivina}. ¿Es correcto?`;
         opcionesDiv.style.display = "flex";
         this.registrar(`Posible personaje: ${adivina}`);
         return;
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function mostrarGaleria() {
     const galeria = document.getElementById('galeria');
     if (!window.personajes || window.personajes.length === 0) {
-      galeria.innerHTML = "<p style='text-align:center;color:#6b21a8;'>⚠️ No hay personajes cargados.</p>";
+      galeria.innerHTML = "<p style='text-align:center;color:#6b21a8;'> No hay personajes cargados.</p>";
       return;
     }
     galeria.innerHTML = window.personajes.map(p => {
@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   mostrarGaleria();
 
-  // ===== Motor (crear DESPUÉS de cargar personajes) =====
+  // ===== Motor (despues de cargar imagenes) =====
   let motor = new MotorInferencia(window.personajes, reglas);
 
   // ===== Modal + helpers =====
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById("btnAprender").onclick = () => abrirModalNuevoPersonaje();
   document.getElementById("btnSi").onclick = () => {
     motor.registrar(`✅ Confirmado: era ${motor.personajeAdivinado}`);
-    alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} 😄`);
+    alert(`¡Genial! Sabía que era ${motor.personajeAdivinado} `);
     document.getElementById("opcionesRespuesta").style.display = "none";
     document.getElementById("pregunta").textContent = "";
   };
