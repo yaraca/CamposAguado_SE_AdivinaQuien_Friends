@@ -546,11 +546,15 @@
 
   // Reiniciar conocimiento
   document.getElementById("btnReset").onclick = () => {
-    if (confirm("¿Seguro que quieres borrar todo y reiniciar el conocimiento?")) {
-      localStorage.removeItem("personajes_friends");
+    if (confirm("¿Seguro que quieres reiniciar el conocimiento (sin borrar las imágenes base)?")) {
+      // Limpia solo los personajes agregados, no los base
       personajes = personajesBase();
-      alert("✅ Base de conocimiento reiniciada. Se restauraron los 6 personajes originales.");
-      location.reload();
+      localStorage.setItem("personajes_friends", JSON.stringify(personajes));
+      mostrarGaleria();
+      alert("✅ Se restauraron los 6 personajes originales de Friends.");
+      motor = new MotorInferencia(personajes, reglas);
+      document.getElementById("pregunta").textContent = "";
+      document.getElementById("log").innerHTML = "";
     }
   };
 
