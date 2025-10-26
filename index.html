@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => { // Esperar a que el html e
     }
   }
 
-  let motor = new MotorInferencia(personajes, reglas); // instancia inicial del motor de inferencia
+  let motor = new MotorInferencia(window.personajes, reglas); // instancia inicial del motor de inferencia
 
   /* =========================================================
      Modal + helpers (carga imagen Base64, guardar, etc.)
@@ -633,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => { // Esperar a que el html e
      Eventos de botones
   ========================================================= */
   document.getElementById("btnIniciar").onclick = () => { // iniciar juego
-    motor = new MotorInferencia(personajes, reglas); // nueva instancia del motor
+    motor = new MotorInferencia(window.personajes, reglas); // nueva instancia del motor
     motor.registrar(" Juego iniciado."); // registrar inicio
     document.getElementById("btnPreguntar").disabled = false; // habilitar botón de preguntar
     document.getElementById("pregunta").textContent = ""; // limpiar pregunta
@@ -668,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => { // Esperar a que el html e
       localStorage.setItem("personajes_friends", JSON.stringify(personajes)); // guardar en localStorage
       mostrarGaleria(); // refresca la galeria con los personajes iniciales
       alert("✅ Se restauraron los 6 personajes originales de Friends."); 
-      motor = new MotorInferencia(personajes, reglas); // reiniciar motor
+      motor = new MotorInferencia(window.personajes, reglas); // reiniciar motor
       document.getElementById("pregunta").textContent = ""; // limpiar pregunta
       document.getElementById("log").innerHTML = ""; // limpiar log
     }
